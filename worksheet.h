@@ -91,8 +91,9 @@ public:
     void setFilterIndexes(const QVector<qint32> &indexes,WorkSheetData::FilterMode);
     void setFilterIndexes(const QVector<qint32> &indexes);
     void setSearchIndexes(const QVector <qint32> &indexes);
-
     void setWorkSheetData(const WorkSheetData &wsd);
+    void validateSelection();
+
     TableSchema *getTableSchema();
     QUuid getID();
     quint32 doSearch(SearchType);

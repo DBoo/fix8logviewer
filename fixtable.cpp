@@ -173,10 +173,11 @@ void FixTable::setSenderIDFilter(QStringList ids)
 void FixTable::validateFilters()
 {
     bool haveFilter = false;
-
+    qDebug() << "FixTable::ValidateFilters, sender ids count = " << senderIDs.count() << __FILE__ << __LINE__;
     if (senderIDs.count() > 0)
         haveFilter = true;
-    else if ((logicFilterIndexes.count() > 0) && filterMode != WorkSheetData::Off)
+    //else if ((logicFilterIndexes.count() > 0) && filterMode != WorkSheetData::Off)
+    else if (filterMode != WorkSheetData::Off)
         haveFilter = true;
     if (haveFilter) {
             proxyFilter->setSourceModel(_model);

@@ -265,6 +265,7 @@ void MainWindow::filterModeChangedSlot(int fm)
         qDebug() << "DIFFFRENT FILTERS RUN AGAIN...";
         runFilterScript();
     //}
+        updateMessageArea();
     update();
 }
 bool MainWindow::runFilterScript()
@@ -401,7 +402,7 @@ bool MainWindow::runFilterScript()
                 // qDebug() << ">>>>>CALL SCRIPT WITH VARGS:" << vargs << __LINE__;
                 //qDebug() << ">>>>>CALL SCRIPT WITH  ARGS COUNT :" << args.count() << __LINE__;
                 answer = filterFunctionVal.call(QScriptValue(), args);
-                qDebug() << "ANSWER:" << answer.toBool() ;
+                qDebug() << "row" << row << ", answer: " << answer.toBool() << __FILE__ << __LINE__;
                 if (answer.toBool()) {
                     filterLogicalIndexes.append(row);
                     break;
@@ -418,5 +419,16 @@ bool MainWindow::runFilterScript()
     WorkSheetData::FilterMode filterMode = (WorkSheetData::FilterMode) filterButtonGroup->checkedId();
     ws->setFilterIndexes(filterLogicalIndexes,filterMode); // add mode to this
     update();
+    updateMessageArea();
     return true;
+}
+void MainWindow::updateMessageArea()
+{
+    qDebug() << "Update Message Area" << __FILE__ << __LINE__;
+   WorkSheet *ws  = qobject_cast <WorkSheet *> (tabW->currentWidget());
+   if (!ws) {
+       qWarning() << "Filter Failed, work sheet is null" << __FILE__ << __LINE__;
+       return;
+   }
+   ws->validateSelection();
 }

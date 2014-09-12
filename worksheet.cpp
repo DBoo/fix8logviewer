@@ -47,6 +47,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "globals.h"
 #include "intItem.h"
 #include "messagearea.h"
+#include "proxyFilter.h"
 #include "tableschema.h"
 #include "threadloader.h"
 #include "worksheetmodel.h"
@@ -575,18 +576,29 @@ void  WorkSheet::hideColumn(int colNum, bool hideCol)
 }
 void  WorkSheet::rowSelectedSlot(QModelIndex mi)
 {
-    QModelIndex mi2 = sm->currentIndex();
-    currentRow = mi2.row();
-    qDebug() << "SM CURRENT INDEX = " << mi2.row();
+    const ProxyFilter *pf;
+
+    if (fixTable->proxyFilterInUse()) {
+        pf = fixTable->getProxyFilter();
+        mi = pf->mapToSource(mi);
+        qDebug() << "Map Index to Source" << __FILE__<< __LINE__;
+        if  (!mi.isValid()) {
+            qWarning() << "Invalid Model Index" << __FILE__<< __LINE__;
+            return;
+        }
+
+
+    }
+    currentRow = mi.row();
     QMessage *message;
-    int row = mi.row();
+    qDebug() << "MAPPED ROW = " << currentRow;
     if (!_model) {
         qWarning() << "ERROR - MODEL IS NULL" << __FILE__ << __LINE__;
         emit rowSelected(currentRow);
         return;
     }
     for (int i=0;i<  _model->columnCount();i++) {
-        QModelIndex otherIndex = _model->index(row,0);
+        QModelIndex otherIndex = _model->index(currentRow,0);
         if (otherIndex.isValid()) {
             QVariant var = _model->data(otherIndex,Qt::UserRole + 1);
             if (var.isValid()) {
@@ -601,6 +613,14 @@ void  WorkSheet::rowSelectedSlot(QModelIndex mi)
     emit rowSelected(currentRow);
 
 }
+void WorkSheet::validateSelection()
+{
+    QModelIndex mi = fixTable->currentIndex();
+    if (!mi.isValid()) {
+        messageArea->setMessage(0);
+    }
+}
+
 void WorkSheet::setAlias(QString &str)
 {
     alias = str;

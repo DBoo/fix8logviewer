@@ -63,6 +63,7 @@ class FixTable: public QTableView {
   bool proxyFilterInUse();
   const ProxyFilter * getProxyFilter();
   const WorkSheetModel *getWorkSheetModel();
+
     void redoSearch();
   void setAnouncement(const QString &message,int interval=5000); // milisec
   void setWindowID(QUuid &uuid);

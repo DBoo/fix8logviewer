@@ -189,110 +189,113 @@ void MessageArea::setMessage(QMessage *m)
     setUpdatesEnabled(false);
 
     headerItem->removeRows(0,headerItem->rowCount());
-
     fieldItem->removeRows(0,fieldItem->rowCount());
     //groupItem->removeRows(0,groupItem->rowCount());
     tailItem->removeRows(0,tailItem->rowCount());
-    if (currentMessage) {
-        seqNumV->setText(QString::number(currentMessage->seqID));
-        Message *msg = currentMessage->mesg;
-        header = msg->Header();
-        trailer = msg->Trailer();
-        const Presence& pre(msg->get_fp().get_presence());
-        messageType =  QString::fromStdString(msg->get_msgtype());
-        const char *dum = msg->get_msgtype().c_str();
-        BaseMsgEntry bme = sharedLib->ctxFunc()._bme.find_ref(dum);
-        messageTypeV->setText(bme._name);
-
-        for (Fields::const_iterator itr(header->fields_begin()); itr != header->fields_end(); ++itr)
-        {
-            const FieldTrait::FieldType trait(pre.find(itr->first)->_ftype);
-            name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
-            bf = itr->second;
-            memset(c,'\0',60);
-            bf->print(c);
-            str  = QString::fromLatin1(c);
-            QStandardItem *messageItem =
-                    new QStandardItem(name);
-            QStandardItem *valueItem =
-                    new QStandardItem(str);
-            QList <QStandardItem *>items;
-            items.append(messageItem);
-            items.append(valueItem);
-            headerItem->appendRow(items);
-
-        }
-        //for (Positions::const_iterator itr(msg->); itr != _pos.end(); ++i
-        for (Fields::const_iterator itr(msg->fields_begin()); itr != msg->fields_end(); ++itr)
-        {
-            QList <QStandardItem *>items;
-            if (msg->get_fp().is_group(itr->first)) {
-                name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
-                GroupBase *gb (msg->find_group(itr->first));
-
-                if (gb)
-                {
-                    //display group
-                    int  gbSize = gb->size();
-                    QStandardItem *groupItem = new QStandardItem(name);
-                    QStandardItem *groupCountItem = new QStandardItem(QString::number(gb->size()));
-                    items.append(groupItem);
-                    items.append(groupCountItem);
-                    fieldItem->appendRow(items);
-                    int i=0;
-                    generateItems(gb,groupItem,msg,&i);
-                }
-            }
-            else {
-                name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
-                bf = itr->second;
-                memset(c,'\0',60);
-                bf->print(c);
-                str = QString::fromLatin1(c);
-                QStandardItem *messageItem =
-                        new QStandardItem(name);
-                QStandardItem *valueItem =
-                        new QStandardItem(str);
-
-                items.append(messageItem);
-                items.append(valueItem);
-                fieldItem->appendRow(items);
-            }
-        }
-
-        // qDebug() << "GROUPS COUNT = " << groups.size() << __FILE__ << __LINE__;
-        //for (Fields::const_iterator itr(msg->get_groups()
-        for (Fields::const_iterator itr(trailer->fields_begin()); itr != trailer->fields_end(); ++itr)
-        {
-            treeView->isExpanded(headerItem->index());
-            const FieldTrait::FieldType trait(pre.find(itr->first)->_ftype);
-            name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
-            bf = itr->second;
-            memset(c,'\0',60);
-            bf->print(c);
-            str =  QString::fromLatin1(c);
-            QStandardItem *messageItem =
-                    new QStandardItem(name);
-            QStandardItem *valueItem =
-                    new QStandardItem(str);
-            QList <QStandardItem *>items;
-            items.append(messageItem);
-            items.append(valueItem);
-            tailItem->appendRow(items);
-        }
-        if (expandMode == ExpandOne)
-            treeView->expandToDepth(1);
-        else if (expandMode == ExpandAll)
-            treeView->expandAll();
-
-        treeView->setExpanded(headerItem->index(),headerExpanded);
-        treeView->setExpanded(fieldItem->index(),fieldExpanded);
-        treeView->setExpanded(tailItem->index(),tailExpanded);
-        setUpdatesEnabled(true);
-    }
-    else {
+    if (!currentMessage) {
         seqNumV->setText("");
+        setUpdatesEnabled(true);
+        return;
     }
+    seqNumV->setText(QString::number(currentMessage->seqID));
+    Message *msg = currentMessage->mesg;
+    header = msg->Header();
+    trailer = msg->Trailer();
+    const Presence& pre(msg->get_fp().get_presence());
+    messageType =  QString::fromStdString(msg->get_msgtype());
+    const char *dum = msg->get_msgtype().c_str();
+    BaseMsgEntry bme = sharedLib->ctxFunc()._bme.find_ref(dum);
+    messageTypeV->setText(bme._name);
+
+    for (Fields::const_iterator itr(header->fields_begin()); itr != header->fields_end(); ++itr)
+    {
+        const FieldTrait::FieldType trait(pre.find(itr->first)->_ftype);
+        name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
+        bf = itr->second;
+        memset(c,'\0',60);
+        bf->print(c);
+        str  = QString::fromLatin1(c);
+        QStandardItem *messageItem =
+                new QStandardItem(name);
+        QStandardItem *valueItem =
+                new QStandardItem(str);
+        QList <QStandardItem *>items;
+        items.append(messageItem);
+        items.append(valueItem);
+        headerItem->appendRow(items);
+
+    }
+    //for (Positions::const_iterator itr(msg->); itr != _pos.end(); ++i
+    for (Fields::const_iterator itr(msg->fields_begin()); itr != msg->fields_end(); ++itr)
+    {
+        QList <QStandardItem *>items;
+        if (msg->get_fp().is_group(itr->first)) {
+            name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
+            GroupBase *gb (msg->find_group(itr->first));
+
+            if (gb)
+            {
+                //display group
+                int  gbSize = gb->size();
+                QStandardItem *groupItem = new QStandardItem(name);
+                QStandardItem *groupCountItem = new QStandardItem(QString::number(gb->size()));
+                items.append(groupItem);
+                items.append(groupCountItem);
+                fieldItem->appendRow(items);
+                int i=0;
+                generateItems(gb,groupItem,msg,&i);
+            }
+        }
+        else {
+            name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
+            bf = itr->second;
+            memset(c,'\0',60);
+            bf->print(c);
+            str = QString::fromLatin1(c);
+            QStandardItem *messageItem =
+                    new QStandardItem(name);
+            QStandardItem *valueItem =
+                    new QStandardItem(str);
+
+            items.append(messageItem);
+            items.append(valueItem);
+            fieldItem->appendRow(items);
+        }
+    }
+
+    // qDebug() << "GROUPS COUNT = " << groups.size() << __FILE__ << __LINE__;
+    //for (Fields::const_iterator itr(msg->get_groups()
+    for (Fields::const_iterator itr(trailer->fields_begin()); itr != trailer->fields_end(); ++itr)
+    {
+        treeView->isExpanded(headerItem->index());
+        const FieldTrait::FieldType trait(pre.find(itr->first)->_ftype);
+        name = QString::fromStdString(sharedLib->ctxFunc().find_be(itr->first)->_name);
+        bf = itr->second;
+        memset(c,'\0',60);
+        bf->print(c);
+        str =  QString::fromLatin1(c);
+        QStandardItem *messageItem =
+                new QStandardItem(name);
+        QStandardItem *valueItem =
+                new QStandardItem(str);
+        QList <QStandardItem *>items;
+        items.append(messageItem);
+        items.append(valueItem);
+        tailItem->appendRow(items);
+    }
+    if (expandMode == ExpandOne)
+        treeView->expandToDepth(1);
+    else if (expandMode == ExpandAll)
+        treeView->expandAll();
+
+    treeView->setExpanded(headerItem->index(),headerExpanded);
+    treeView->setExpanded(fieldItem->index(),fieldExpanded);
+    treeView->setExpanded(tailItem->index(),tailExpanded);
+    setUpdatesEnabled(true);
+
+
+
+
 }
 void MessageArea::setItemExpaned(TreeItem ti,bool expanded)
 {

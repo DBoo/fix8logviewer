@@ -42,8 +42,15 @@ bool ProxyFilter::filterAcceptsRow (int row,
        rowAccepted =  false;
        return false;
      }
-    if (filterMode == WorkSheetData::Off || logicFilterIndexes.count() < 1)
-      return true;
+    if (filterMode == WorkSheetData::Off)
+     return true;
+    if (logicFilterIndexes.count() < 1) {
+        if (filterMode == WorkSheetData::Exclusive)
+            return false;
+        else
+            return true;
+    }
+
     if (filterMode == WorkSheetData::Exclusive) {
         if (logicFilterIndexes.contains(row) )
             return false;

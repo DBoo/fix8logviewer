@@ -180,6 +180,7 @@ public:
     void toolbarOrientationChangedSlot(Qt::Orientation);
 protected:
     enum {ShowNoDataLabel,ShowTab,ShowProgress};
+    void updateMessageArea();
     void validateSearchButtons();
     void validateSearchButtons(quint32 searchStatus, WorkSheet *ws);
     QAction  *aboutA;
