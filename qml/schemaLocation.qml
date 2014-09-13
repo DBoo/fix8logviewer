@@ -5,7 +5,6 @@ import QtQuick.Layouts 1.1
 Rectangle {
     id: aboutSchemas
     objectName:"aboutSchemas"
-    color: backgroundcolor
     width: 600
     height: 550
     property string systemDir:"unknown"

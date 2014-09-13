@@ -496,7 +496,6 @@ void MainWindow::exportSlot(QAction *action)
     int status = fileDialog->exec();
     exportDir = fileDialog->directory().path();
     viewMode = fileDialog->viewMode();
-    qDebug() << "Save path as:" << exportDir << __FILE__ << __LINE__;
     settings.setValue("ExportDir",exportDir);
     settings.setValue("ExportViewMode",viewMode);
     QStringList fileNames = fileDialog->selectedFiles();

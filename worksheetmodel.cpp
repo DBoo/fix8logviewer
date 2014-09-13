@@ -68,22 +68,16 @@ WorkSheetModel * WorkSheetModel::clone(const bool &cancelLoad)
     if (tableSchema)
         wsm->setTableSchema(*tableSchema);
     if (messageList) {
-        qDebug() << "1 SET MESSAGE LIST COUNT = " << messageList->count()  << __FILE__ << __LINE__;
         QMessageList *newMessageList = messageList->clone(cancelLoad);
-        qDebug() << "2 SET MESSAGE LIST COUNT = " << messageList->count()  << __FILE__ << __LINE__;
         if (cancelLoad) {
             wsm->deleteLater();
             wsm = 0;
             return wsm;
         }
-        if(newMessageList)
-            qDebug() << "\tNEW MESSAGE LIST COUNT " << newMessageList->count() << __FILE__ << __LINE__;
-        else
-            qDebug() << "\tNEW MESSAGE LIST IS NULL" << __FILE__ << __LINE__;
+
         wsm->setMessageList(newMessageList,cancelLoad);
     }
     if(cancelLoad) {  // gui set this to cancel
-        qDebug() << "HAVE CANCEL LOAD" << __FILE__ << __LINE__;
         wsm->deleteLater();
         wsm = 0;
     }
@@ -444,5 +438,5 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
         rowPos++;
     }
     int nMilliseconds = myTimer.elapsed();
-    qDebug() << "TIME TO LOAD = " << nMilliseconds;
+    //qDebug() << "TIME TO LOAD = " << nMilliseconds;
 }

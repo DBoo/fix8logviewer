@@ -1,31 +1,58 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Dialogs 1.0
-
+import QtQuick.Controls.Styles 1.2
 TabView {
     id:tv
-    function serVersion(version)
+    property color bgColor:"green"
+    property string version:"1.2"
+    function setVersion(v)
     {
-        versionText.text = "Version: " + version;
+        version = v;
     }
+    style: TabViewStyle {
 
+        frameOverlap: 1
+
+        tabBar: Rectangle { color: tv.bgColor; anchors.fill: parent }
+    }
     anchors.fill: parent
     Component.onCompleted: {
         addTab("Version",versionTab)
         addTab("Description", descriptionTab)
-        addTab("Contact", contactTab)
+        addTab("Author", authorTab)
+        addTab("Community",communityTab)
         addTab("License", licenseTab)
     }
     Component {
         id: versionTab
         Rectangle {
             id:versionRec
-            radius: 12
             anchors.fill: parent
+            anchors.margins: 24
+            radius: 8
+            Text  {
+                id:versionTitle
+                text: "Fix8LogViewer Version"
+                color:"black"
+                font.bold: true;
+                font.pointSize: 18
+                anchors.top: parent.top
+                anchors.topMargin: 100
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
             Text {
                 id:versionText
-                anchors.centerIn: parent
-                font.pointSize: 16
+                text:tv.version
+                color:"black"
+                font.pointSize: 18
+                font.bold: true
+                anchors.top:versionTitle.bottom
+                anchors.topMargin: 18
+                anchors.horizontalCenter: parent.horizontalCenter
+
+
 
             }
         }
@@ -34,94 +61,68 @@ TabView {
         id: descriptionTab
         Rectangle {
             id:descriptionRec
-            radius: 14
             anchors.fill: parent
-            anchors.margins: 22
+            anchors.margins: 24
+            radius: 8
+
             TextArea {
                 frameVisible: false
                 id:textArea
                 anchors.fill: parent
-                anchors.margins: 6
-                text: 'Fix8LogView is an opensource Fix log file viewer.  '
+                anchors.topMargin: 22
+                anchors.rightMargin: 12
+                anchors.leftMargin: 12
+                font.bold: true
+                font.pointSize: 15
+                textFormat:Text.RichText
+                text: '<html> <body> <i>Fix8logviewer</i> is an open source FIX log file viewer. These log files need to be in xml format. <i>Fix8logviewer</I> ships with several FIX schemas but also allows the user to add their own custome FIX schemas. Please refer to the FIX8 community website to find out how to support custome schemas.</body></html> '
+                readOnly: true
             }
         }
     }
     Component {
-        id: contactTab
+        id: authorTab
         Rectangle  {
+            anchors.margins: 24
             anchors.fill: parent
-            anchors.margins: 22
-            radius:12
-            Text {
+            radius:8
+            TextArea {
                 id: name
-                text: qsTr("Developer: David Boosalis")
-                anchors.top: parent.top
-                anchors.topMargin: 32
-                anchors.left: parent.left
-                anchors.leftMargin: 32
-            }
-            Text {
-                id: email
-                text: qsTr("Email:")
-                anchors.top: name.bottom
-                anchors.topMargin: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 32
-
-            }
-            Text {
-                id: emailAddress
+                frameVisible: false
+                font.bold: true
+                font.pointSize: 15
+                readOnly: true
                 textFormat:Text.RichText
-                text: '<html> <body> <a href="mailto://david.boosalis@gmail.com">david.boosalis@fix8.org</a></body></html>'
+                text: '<html> <body> <i>Fix8logviewer</i> was developed and maintained by <b>David Boosalis</b>.  Please feel free to contact David if you have any questions or suggestions.  David is also available for consulting work.<p> <a href="mailto://david.boosalis@gmail.com">david.boosalis@gmail.com</a>'
                 onLinkActivated:  Qt.openUrlExternally("mailTo:david.booslis@gmail.com")
-                font.italic: true
-                font.bold: true
-                color:"purple"
-                anchors.top: name.bottom
-                anchors.topMargin: 12
-                anchors.left: email.right
-                anchors.leftMargin:8
-                MouseArea {
-                    hoverEnabled: true
-                    acceptedButtons: Qt.NoButton
-                    anchors.fill: parent
-                    onEntered: {
-                        cursorShape:Qt.WaitCursor
-                    }
-
-                }
+                anchors.fill: parent
+                anchors.topMargin: 22
+                anchors.rightMargin: 12
+                anchors.leftMargin: 12
             }
-            /**************/
-            Text {
-                id: fix8Community
-                text: qsTr("Fix 8 Community:")
-                anchors.top: emailAddress.bottom
-                anchors.topMargin: 32
+        }
+    }
+    Component {
+        id: communityTab
+        Rectangle {
+            id:jiraRect
+            radius:8
+            anchors.fill: parent
+            anchors.margins: 24
+            TextArea {
+                id:jiraText
+                frameVisible: false
+                anchors.top: parent.top
+                anchors.right: parent.right
                 anchors.left: parent.left
-                anchors.leftMargin: 32
-            }
-
-            Text {
-                id: fix8CommunityWeb
-                textFormat:Text.RichText
-                text: '<html> <body> <a href="http://www.fix8.org"> www.fix8.org</a> </body></html>'
-                onLinkActivated:  Qt.openUrlExternally("http://www.fix8.org")
-                font.italic: true
+                height: 100
+                anchors.margins: 12
                 font.bold: true
-                color:"purple"
-                anchors.top: emailAddress.bottom
-                anchors.topMargin: 32
-                anchors.left: fix8Community.right
-                anchors.leftMargin:8
-                MouseArea {
-                    hoverEnabled: true
-                    acceptedButtons: Qt.NoButton
-                    anchors.fill: parent
-                    onEntered: {
-                        cursorShape:Qt.WaitCursor
-                    }
-
-                }
+                font.pointSize: 14
+                readOnly: true
+                textFormat: TextEdit.RichText
+                text:  '<html> <body> To report or check on a bug please visit <a href="https://www.fix8.org">Fix8 Community Forum/Tools</a></body></html>'
+                onLinkActivated:  Qt.openUrlExternally("https://fix8.org")
             }
         }
     }
@@ -129,27 +130,21 @@ TabView {
         id: licenseTab
         Rectangle {
             id:licRect
-            radius: 12
-            anchors.top: parent.top
-            anchors.topMargin: 12
-            anchors.left: parent.left
-            anchors.leftMargin: 16
-            anchors.right: parent.right
-            anchors.rightMargin: 16
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 12
+            radius:8
+            anchors.fill: parent
+            anchors.margins: 24
             TextArea {
                 id:licText
-                frameVisible: false
                 anchors.fill: parent
-                anchors.margins: 12
+                anchors.margins: 24
+                font.bold: true
+                font.pointSize: 15
+                readOnly: true
                 textFormat: TextEdit.RichText
                 text:  '<html> <body> This product is released under the <a href="https://www.gnu.org/licenses/quick-guide-gplv3.html">GNU LESSER GENERAL PUBLIC LICENSE Version 3 </a></body></html>'
                 onLinkActivated:  Qt.openUrlExternally("https://www.gnu.org/licenses/quick-guide-gplv3.html")
             }
         }
     }
-
-
 }
 

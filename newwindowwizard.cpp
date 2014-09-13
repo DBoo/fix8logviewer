@@ -56,12 +56,10 @@ void NewWindowWizard::createSchemaPage()
 
     schemaPage->loadSchemas(Fix8SharedLib::SystemLib);
     schemaPage->loadSchemas(Fix8SharedLib::UserLib);
-    qDebug() << "NUM OF ITEMS " << schemaPage->schemaModel->rowCount() << __FILE__;
     if (schemaPage->schemaModel->rowCount() < 1) {
         schemaPage->schemaStack->setCurrentIndex(schemaPage->noSchemasID);
     }
     else {
-        qDebug() << "RAISE SCHEMS LIST ID:" << schemaPage->schemasListID;
        schemaPage->schemaStack->setCurrentIndex(schemaPage->schemasListID);
     }
        addPage(schemaPage);

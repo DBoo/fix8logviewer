@@ -103,7 +103,6 @@ bool NewWindowSchemaPage::loadSchemas(Fix8SharedLib::LibType libType)
         schemaErrorStrList.append(errorStr);
         return false;
     }
-    qDebug() << "Load Schemas: Dir = " << schemaDir.absolutePath() << __FILE__ << __LINE__;
     QFileInfoList fileInfoList = schemaDir.entryInfoList(QDir::Files |QDir::NoDotAndDotDot| QDir::NoSymLinks);
     QFileInfo fi;
     QStandardItem *si;

@@ -90,5 +90,8 @@
         <file>images/svg/searchOff.svg</file>
         <file>images/svg/searchOn.svg</file>
         <file>qml/schemaLocation.qml</file>
+        <file>images/128x128/logviewer.png</file>
+        <file>images/64x64/logviewer.png</file>
+        <file>images/32x32/logviewer.png</file>
     </qresource>
 </RCC>

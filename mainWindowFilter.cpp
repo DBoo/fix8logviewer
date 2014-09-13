@@ -262,7 +262,7 @@ void MainWindow::filterModeChangedSlot(int fm)
     }
     else {
     */
-        qDebug() << "DIFFFRENT FILTERS RUN AGAIN...";
+     //   qDebug() << "DIFFFRENT FILTERS RUN AGAIN...";
         runFilterScript();
     //}
         updateMessageArea();
@@ -278,7 +278,7 @@ bool MainWindow::runFilterScript()
     QVariant var,var1;
     QString arg;
     QVector <qint32> filterLogicalIndexes;
-    qDebug() << "FILTER FUNCTION " << filterFunction.javascript << __FILE__ << __LINE__;
+    //qDebug() << "FILTER FUNCTION " << filterFunction.javascript << __FILE__ << __LINE__;
     filterFunctionVal = engine.evaluate(filterFunction.javascript);
     if (tabW->count()  < 1) {
         qWarning() << "Filter Failed, no work sheets" << __FILE__ << __LINE__;
@@ -332,7 +332,7 @@ bool MainWindow::runFilterScript()
                 }
             }
             else {
-                qDebug() << "\tSkip it" << __LINE__;
+                //qDebug() << "\tSkip it" << __LINE__;
                 skipPoint = j;
                 skip = true;
                 break; // nbsps
@@ -402,7 +402,7 @@ bool MainWindow::runFilterScript()
                 // qDebug() << ">>>>>CALL SCRIPT WITH VARGS:" << vargs << __LINE__;
                 //qDebug() << ">>>>>CALL SCRIPT WITH  ARGS COUNT :" << args.count() << __LINE__;
                 answer = filterFunctionVal.call(QScriptValue(), args);
-                qDebug() << "row" << row << ", answer: " << answer.toBool() << __FILE__ << __LINE__;
+                //qDebug() << "row" << row << ", answer: " << answer.toBool() << __FILE__ << __LINE__;
                 if (answer.toBool()) {
                     filterLogicalIndexes.append(row);
                     break;
@@ -424,7 +424,7 @@ bool MainWindow::runFilterScript()
 }
 void MainWindow::updateMessageArea()
 {
-    qDebug() << "Update Message Area" << __FILE__ << __LINE__;
+   // qDebug() << "Update Message Area" << __FILE__ << __LINE__;
    WorkSheet *ws  = qobject_cast <WorkSheet *> (tabW->currentWidget());
    if (!ws) {
        qWarning() << "Filter Failed, work sheet is null" << __FILE__ << __LINE__;

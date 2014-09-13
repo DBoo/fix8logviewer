@@ -159,7 +159,7 @@ void MainWindow::buildMainWindow()
 {
     setAutoFillBackground(true);
 
-    setWindowIcon(QIcon(":/images/svg/logo.svg"));
+    setWindowIcon(QIcon(":/images/64x64/logviewer.png"));
     setAcceptDrops(true);
     uuid = QUuid::createUuid();
     setAnimated(true);
@@ -289,17 +289,12 @@ void MainWindow::buildMainWindow()
     fontActionGroup->addAction(fontRegularA);
     connect(fontActionGroup,SIGNAL(triggered(QAction*)),this,SLOT(setFontSlot(QAction*)));
 
-
     mainToolBar->setMovable(true);
     filterToolBar->setMovable(true);
     searchToolBar->setMovable(true);
     searchToolBar->setAllowedAreas(Qt::TopToolBarArea|Qt::BottomToolBarArea);
     addToolBar(Qt::TopToolBarArea,mainToolBar);
-    qDebug() << "*************  IS FIRST TIME:" << GUI::Globals::isFirstTime << __FILE__ << __LINE__;
-
-
     addToolBar(Qt::TopToolBarArea,searchToolBar);
-
     addToolBar(Qt::TopToolBarArea,filterToolBar);
     if (GUI::Globals::isFirstTime) {
         insertToolBarBreak(searchToolBar);
@@ -659,11 +654,13 @@ void MainWindow::buildMainWindow()
     }
     // helpMenu
     aboutA = new QAction("About",this);
-    aboutQTA = new QAction("Qt",this);
+    aboutQTA = new QAction("About Qt",this);
+    connect(aboutQTA,SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     //whatsThis = new QWhatsThis();
 
     helpMenu->addAction(whatsThisA);
     helpMenu->addAction(aboutA);
+    helpMenu->addAction(aboutQTA);
 
     configPB = new PushButtonModifyKey(this);
     configPB->setToolTip("Change menubar color.\n(Hold Shift Key down to change text color)");
@@ -938,7 +935,6 @@ void MainWindow::setWindowData(const WindowData wd)
     name = wd.name;
     tableSchema  = wd.tableSchema;
     if (!tableSchema) {
-        qDebug() << "!!! set table schema to default !!!\n" << __FILE__ << __LINE__;
         tableSchema = defaultTableSchema;
     }
     if (!tableSchema) {
@@ -946,7 +942,6 @@ void MainWindow::setWindowData(const WindowData wd)
         schemaV->setText("???");
         return;
     }
-    qDebug() << "!!! Table Schema Field Names = " << tableSchema->fieldNames << __FILE__ << __LINE__;
     schemaV->setText(tableSchema->name);
     if (!schemaActionGroup) {
         qWarning() << "Error - No  schemas action items found" << __FILE__ << __LINE__;
@@ -1013,7 +1008,7 @@ WorkSheetData MainWindow::getWorksheetData(QUuid &workSheetID, bool *ok)
 }
 void MainWindow::addWorkSheet(WorkSheetData &wsd)
 {
-    qDebug() << " ???NEW CODE, REMOVE OLD ONE" << __FILE__ << __LINE__;
+    //qDebug() << " ???NEW CODE, REMOVE OLD ONE" << __FILE__ << __LINE__;
     int index;
     bool bstatus;
     QString str;
@@ -1272,7 +1267,6 @@ void MainWindow::setTableSchema(TableSchema *newTableSchema)
 }
 void MainWindow::tableSchemaModified(TableSchema *ts)
 {
-    qDebug() << ":::TABLE SCHEMA MODIFIED...." << __FILE__ << __LINE__;
     WorkSheet *ws;
     QAction *action;
     if (!ts) {
@@ -1283,21 +1277,14 @@ void MainWindow::tableSchemaModified(TableSchema *ts)
      qWarning() << "FIELD LIST IS NULL for table modified" << __FILE__ << __LINE__;
      return;
     }
-    qDebug() << ":::TS FIELD COUNT = " << ts->fieldList->count() << __FILE__ << __LINE__;
     QMap<int,QAction *>::const_iterator iter  = schemaActionMap.find(ts->id);
     if (iter != schemaActionMap.end()) {
         action = (QAction *) iter.value();
         action->setText(ts->name);
     }
-    qDebug() << ":::TABLE SCHEMA FIELD LIST COUNT" << tableSchema->fieldList->count() << __FILE__ << __LINE__;
-    qDebug() << ":::TABLE SCHEMA ID = " << tableSchema->id << __FILE__ << __LINE__;
-    qDebug() << ":::TS ID = " << ts->id;
-    if (tableSchema->id == ts->id) {
-        qDebug() << ":::MAKE ASSIGNMENT";
-        qDebug() << ":::TS FFIELD LIST COUNT " << ts->fieldList->count() << __FILE__ << __LINE__;
-        *tableSchema = *ts;
-        qDebug() << "::: AFTER ASSIGNMENT. TABLE SCHEMA FIELD LIST COUNT" << tableSchema->fieldList->count();
 
+    if (tableSchema->id == ts->id) {
+        *tableSchema = *ts;
     }
     QListIterator <WorkSheet *> iter2(workSheetList);
     while(iter2.hasNext()) {
@@ -1392,10 +1379,8 @@ void MainWindow::setSharedLibrary(Fix8SharedLib *f8sl)
         fix8versionV->setToolTip(sharedLib->fileName);
         pal.setColor(QPalette::WindowText,fix8RegColor);
     }
-    qDebug() << "CALL BUILD SCHEMNA MENU" << __FILE__ << __LINE__;
     schemaList = sharedLib->tableSchemas;
     buildSchemaMenu();
-    qDebug() << "AFTER CALL BUILD SCHEMNA MENU" << __FILE__ << __LINE__;
     fix8versionV->setPalette(pal);
 }
 Fix8SharedLib * MainWindow::getSharedLibrary()

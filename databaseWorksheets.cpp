@@ -88,7 +88,7 @@ QList <WorkSheetData> Database::getWorkSheets(int windowID)
         wd.searchFunction.function = query.value(10).toString();
         wd.searchFunction.javascript = query.value(11).toString();
         wd.messageHeaderState = query.value(12).toByteArray();
-        wd.fieldsExpansionType = query.value(13).toUInt();
+        wd.fieldsExpansionType = query.value(13).toInt();
         wsdList.append(wd);
     }
     return wsdList;

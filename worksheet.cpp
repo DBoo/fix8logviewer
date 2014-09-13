@@ -504,7 +504,7 @@ bool WorkSheet::loadFileName(QString &fileName,
     setUpdatesEnabled(true);
  //   showLoadProcess(false);
     returnCode = OK;
-    qDebug() << "Elapsed time of load = " << myTimer.elapsed() << __FILE__ << __LINE__;
+    //qDebug() << "Elapsed time of load = " << myTimer.elapsed() << __FILE__ << __LINE__;
 
     return true;
 }

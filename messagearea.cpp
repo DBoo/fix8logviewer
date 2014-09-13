@@ -395,6 +395,7 @@ void MessageArea::setExpansion(quint32 value)
         break;
     default:
         qWarning() << "Invalid expansion value:" << expandMode << __FILE__ << __LINE__;
+        radioButton = expandNone;
     }
     if (radioButton)
         radioButton->setChecked(true);
