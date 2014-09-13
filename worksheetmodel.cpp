@@ -191,7 +191,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                 w->setUpdatesEnabled(true);
                 w->updateTable();
                 w->update();
-                qApp->processEvents(QEventLoop::QEventLoop::WaitForMoreEvents,100);
+                qApp->processEvents(QEventLoop::WaitForMoreEvents,100);
 
                 w->setUpdatesEnabled(false);
             }
