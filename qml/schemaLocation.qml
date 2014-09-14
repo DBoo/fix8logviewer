@@ -18,8 +18,8 @@ Rectangle {
         anchors.fill: parent
         color: "#ffffff"
         radius: 26
-        border.color: "orange"
-        border.width: 3
+        border.color: "darkorange"
+        border.width: 1
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 36
         anchors.top: parent.top
@@ -27,7 +27,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.rightMargin: 20
-        anchors.leftMargin: 20
+        anchors.leftMargin: 15
         Rectangle {
             id: page1
             anchors.fill: parent;
@@ -41,7 +41,7 @@ Rectangle {
                 width: 85
                 height: 36
                 text: qsTr("Schema Locations")
-                font.pixelSize: 24
+                font.pixelSize: 20
                 font.italic: true
                 font.bold: true
             }
@@ -55,7 +55,7 @@ Rectangle {
                 anchors.rightMargin: 15
                 height: 50
                 text: qsTr("Each LogViewer window is assoicated with one <i>FIX Schema</i>. Available schemas are shown on the right. This list schemas is generated from the following two sources:")
-                font.pixelSize: 16
+                font.pixelSize: 14
                 font.bold: true
                 wrapMode: Text.Wrap
             }
@@ -76,7 +76,7 @@ Rectangle {
                     id:systemLabel
                     text:"System"
                     font.bold: true
-                    font.pixelSize: 18
+                    font.pixelSize: 16
                 }
 
                 Label {
@@ -94,14 +94,14 @@ Rectangle {
                     id:userLabel
                     text:"User"
                     font.bold: true
-                    font.pixelSize: 18
+                    font.pixelSize: 16
                 }
                 Label {
                     id: user
                     Layout.minimumHeight: 60
                     Layout.preferredWidth: 355
 
-                    text: qsTr("<i>Fix8logviewer</i> allows users to install their own FIX schema libs. These schemas may be added to the <i>System</i> schema directory or in the the directory \"<i>f8logviewer/schemalibs</i>\" located in the users's HOME directory.")
+                    text: qsTr("<i>Fix8logviewer</i> allows users to install their own FIX schema libs. These schemas may be added to the <i>System</i> schema directory or in the the directory \"<i>f8logviewer/fixschemas</i>\" located in the users's HOME directory.")
                     font.pixelSize: 16
                     font.bold: true
                     wrapMode: Text.Wrap
@@ -122,7 +122,7 @@ Rectangle {
                 width: 85
                 height: 36
                 text: qsTr("Adding Schemas")
-                font.pixelSize: 24
+                font.pixelSize: 20
                 font.italic: true
                 font.bold: true
             }
@@ -138,7 +138,7 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.rightMargin:8
                 anchors.bottom: parent.bottom
-                font.pixelSize: 16
+                font.pixelSize: 15
                 wrapMode: Text.Wrap
 
                 MouseArea {
@@ -197,7 +197,7 @@ Rectangle {
                 implicitWidth: 124
                 border.width: control.activeFocus ? 2 : 1
                 border.color: "grey"
-                color: "orange"
+                color: "darkorange"
                 radius: 6
             }
             label: Text {
@@ -210,9 +210,9 @@ Rectangle {
             }
         }
         anchors.top: rectangle1.bottom
-        anchors.topMargin: 5
+        anchors.topMargin: 9
         anchors.right: parent.right
-        anchors.rightMargin: 20
+        anchors.rightMargin: 21
     }
 
 }

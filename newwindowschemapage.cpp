@@ -150,7 +150,6 @@ QString  NewWindowSchemaPage::getSelectedLib()
         return fileName;
     }
     QVariant var = index.data(Qt::UserRole + 1);
-    qDebug() << "GOT DATA = " << var.toString() << __FILE__ << __LINE__;
     fileName = var.toString();
     return fileName;
 }

@@ -121,25 +121,36 @@ void EmbeddedFileSelector::readSettings()
     splitter->setSizes(defaultSizeList);
     QByteArray defba = splitter->saveState();
     QByteArray ba =  settings.value("splitter",defba).toByteArray();
-
+    qDebug() << "\tEmbededFileSelector:1";
 
     splitter->restoreState(ba);
+
     currentDir.setPath(settings.value("currentDir",QDir::homePath()).toString());
+    if (!currentDir.exists())
+        currentDir = QDir::home();
     directoryCB->addItem(currentDir.path());
     stackW->setCurrentIndex(settings.value("viewmode",ListView).toInt());
     QModelIndex rootIndex = dirModel->setRootPath(currentDir.path());
+    if (!rootIndex.isValid()) {
+        qWarning() << "Invalid root path" << __FILE__ << __LINE__;
+        rootIndex  = dirModel->setRootPath(QDir::homePath());
+
+    }
     listView->setRootIndex(rootIndex);
     detailView->setRootIndex(rootIndex);
     addParentDir(currentDir);
     detailView->horizontalHeader()->restoreState(settings.value("detailView").toByteArray());
-
     validate();
 }
 void EmbeddedFileSelector::addParentDir(QDir dir)
 {
-    if (dir == QDir::root())
+    // loop all the way up to root dir;
+    if (dir == QDir::root()) {
         return;
+    }
     dir.cdUp();
+    if (!dir.exists())
+        return;
     directoryCB->addItem(dir.path());
     addParentDir(dir);
 }

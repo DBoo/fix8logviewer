@@ -31,7 +31,13 @@ void NewWindowFilePage::readSettings()
     QRect defaultRect(0,100,900,700);
     QVariant defaultVar(defaultRect);
     setGeometry(settings.value("geometry",defaultRect).toRect());
-    fileSelector->readSettings();
+    qDebug() << "File Selector read settings....";
+    if (fileSelector) {
+        fileSelector->readSettings();
+    }
+    else
+        qWarning() << "No File selector" << __FILE__ << __LINE__;
+
 }
 void NewWindowFilePage::saveSettings()
 {

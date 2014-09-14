@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
     parser.process(instance);
     if (parser.isSet(loadFileOption)) {
         loadFileName= parser.value(loadFileOption);
-        qDebug() << "Load File Name = " << loadFileName;
         QFileInfo fi(loadFileName);
         if (!fi.exists()) {
             qWarning() << "Error - " << loadFileName << " does not exist.";
@@ -78,11 +77,11 @@ int main(int argc, char *argv[])
     QObject::connect(&instance,SIGNAL(messageReceived(const QString&)),
                      f8l,SLOT(wakeupSlot(const QString&)));
 
-    //QString fixLib = "/home/f8log/"
-    //if (loadFile)
-    //    f8l->init(loadFileName);
-   // else
-        f8l->init();
+   bool  bstatus = f8l->init();
+    if (!bstatus) {
+        qWarning() << "Init failed..." << __FILE__ << __LINE__;
+        return -1;
+    }
     return instance.exec();
 
 }

@@ -95,12 +95,14 @@ bool Fix8Log::init()
     qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,10);
     QListIterator <WindowData> iter(windowDataList);
     Fix8SharedLib  *fixlib;
+    qDebug() << "AUTO SAVE ON:" << autoSaveOn << __FILE__ << __LINE__;
     if (autoSaveOn){
         while(iter.hasNext()) {
             wd = iter.next();
             if (wd.fix8sharedlib.length() > 0) {
                 fixlib = fix8ShareLibList.findByFileName(wd.fix8sharedlib);
                 if (!fixlib) {
+                    qDebug() << "Create Shared Lib" << __FILE__ << __LINE__;
                     bstatus = createSharedLib(wd.fix8sharedlib,&fixlib,defaultTableSchema);
                     if (!bstatus)
                         goto done;
@@ -159,7 +161,7 @@ bool Fix8Log::init()
         else
             newWindowWizard->resize(newWindowWizard->sizeHint());
 
-        QDesktopWidget *desktop = QApplication::desktop();
+       // QDesktopWidget *desktop = QApplication::desktop();
         status = newWindowWizard->exec();
         newWindowWizard->saveSettings();
         if (status != QDialog::Accepted) {
@@ -168,7 +170,9 @@ bool Fix8Log::init()
                 delete dbFile;
             }
             qApp->exit(0);
+            return false;
         }
+        qDebug() << "Continue after newWindowWizard, status =  " << status << __FILE__ << __LINE__;
         fileName = newWindowWizard->getSelectedFile();
         libName = newWindowWizard->getSelectedLib();
         bstatus = createSharedLib(libName,&f8lib,defaultTableSchema);
@@ -177,6 +181,7 @@ bool Fix8Log::init()
             QMessageBox::warning(0,Globals::appName,errorStr);
             newWindowWizard->deleteLater();
             qApp->exit(0);
+            return false;
         }
 
         if (!f8lib) {
@@ -185,6 +190,7 @@ bool Fix8Log::init()
             QMessageBox::warning(0,Globals::appName,errorStr);
             newWindowWizard->deleteLater();
             qApp->exit(0);
+            return false;
         }
         if (!(f8lib->isOK)) {
             qWarning() << ">>>>>>>>>>>>>SHARE LIB SET TO" << f8lib->fileName << __FILE__ << __LINE__;
@@ -192,6 +198,7 @@ bool Fix8Log::init()
             QMessageBox::warning(0,Globals::appName,errorStr);
             newWindowWizard->deleteLater();
             qApp->exit(0);
+            return false;
         }
         newMW = new MainWindow(database);
         newMW->setAutoSaveOn(autoSaveOn);
