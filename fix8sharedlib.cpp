@@ -49,8 +49,11 @@ Fix8SharedLib * Fix8SharedLib::create(QString fileName)
     f8sl->name = baseName.right(baseName.length()-3);
 #endif
     bstatus = f8sl->loadFix8so();
-    f8sl->isOK = bstatus;
     // qDebug() << "\tAFTER LOAD bstatus =" << bstatus << __FILE__ << __LINE__;
+    if (bstatus)
+        f8sl->isOK = 0;
+    else
+        f8sl = 0;
     return f8sl;
 }
 TableSchema * Fix8SharedLib::getTableSchema(qint32 tableSchemaID)

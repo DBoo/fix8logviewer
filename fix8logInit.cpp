@@ -95,7 +95,7 @@ bool Fix8Log::init()
     qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,10);
     QListIterator <WindowData> iter(windowDataList);
     Fix8SharedLib  *fixlib;
-    qDebug() << "AUTO SAVE ON:" << autoSaveOn << __FILE__ << __LINE__;
+//    qDebug() << "AUTO SAVE ON:" << autoSaveOn << __FILE__ << __LINE__;
     if (autoSaveOn){
         while(iter.hasNext()) {
             wd = iter.next();
@@ -262,7 +262,7 @@ bool Fix8Log::createSharedLib(QString &fix8sharedlib,Fix8SharedLib **fixlib,
     bool bstatus;
     TableSchemaList *tsl;
     *fixlib = Fix8SharedLib::create(fix8sharedlib);
-    if (!(*fixlib)->isOK) {
+    if (!fixlib || !(*fixlib)->isOK) {
         qWarning() << "FAILED TO CREATED SHARED LIB FOR " << fix8sharedlib;
         return false;
     }
