@@ -177,7 +177,7 @@ bool Fix8Log::init()
         libName = newWindowWizard->getSelectedLib();
         bstatus = createSharedLib(libName,&f8lib,defaultTableSchema);
         if (!bstatus) {
-            errorStr = "Error - failed to load FIX8 sharelib: " + libName;
+            errorStr = "Error2 - failed to load FIX8 sharelib: " + libName;
             QMessageBox::warning(0,Globals::appName,errorStr);
             newWindowWizard->deleteLater();
             qApp->exit(0);

@@ -496,6 +496,7 @@ bool WorkSheet::loadFileName(QString &fileName,
     senderActionGroup->addAction(showAllSendersA);
     senderMenu->addAction(showAllSendersA);
     fixTable->setSortingEnabled(false);
+
     _model->setMessageList(messageList,cancelLoad);
     fixTable->setSortingEnabled(true);
 

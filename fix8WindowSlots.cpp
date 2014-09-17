@@ -86,7 +86,7 @@ void Fix8Log::createNewWindowSlot(MainWindow *mw)
         if (!f8lib) {
             f8lib = Fix8SharedLib::create(libName);
             if (!f8lib) {
-                str = "Error - failed to load FIX8 sharelib: " + libName;
+                str = "Error1 - failed to load FIX8 sharelib: " + libName;
                 QMessageBox::warning(0,Globals::appName,str);
                 newWindowWizard->deleteLater();
                 return;
