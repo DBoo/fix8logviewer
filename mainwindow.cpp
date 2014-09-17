@@ -53,7 +53,8 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 MainWindow::MainWindow(Database *db,bool showLoading)
     : QMainWindow(0),schemaActionGroup(0),fileDialog(0),qmlObject(0),
       windowDataID(-1),loadingActive(showLoading),tableSchema(0),haveFilterFunction(false),
-        haveSearchFunction(false),database(db),linkSearchOn(false),fieldUsePairList(0),sharedLib(0),defaultTableSchema(0),schemaList(0)
+        haveSearchFunction(false),database(db),linkSearchOn(false),fieldUsePairList(0),sharedLib(0),
+        defaultTableSchema(0),schemaList(0),filterRunning(false),cancelFilter(false)
 {
     buildMainWindow();
     if (loadingActive) {
@@ -241,7 +242,6 @@ void MainWindow::buildMainWindow()
 
     filterSelectBox->addWidget(filterSelectL,0);
     filterSelectBox->addWidget(filterSelectCB,1);
-    filterSelectBox->addStretch(2);
 
     editFilterA= new QAction("&Filter Editor",this);
     editFilterA->setIconText("Edit");
@@ -264,8 +264,24 @@ void MainWindow::buildMainWindow()
     filterToolBar->addWidget(filterArea);
     filterToolBar->addAction(saveFilterFuncA);
     filterToolBar->addAction(editFilterA);
-    filterToolBar->addWidget(filterSelectArea);
 
+    filterProgressBar = new QProgressBar(filterToolBar);
+    filterProgressBar->setMinimum(0);
+    filterProgressBar->setMaximum(100);
+    filterProgressBar->setToolTip("Filtering Completed");
+    filterSelectBox->addSpacing(32);
+    filterSelectBox->addWidget(filterProgressBar);
+    filterToolBar->addWidget(filterSelectArea);
+    cancelFilterA = new QAction("Cancel Filter",this);
+    connect(cancelFilterA,SIGNAL(triggered()),this,SLOT(cancelFilterSlot()));
+    QIcon cancelFilterIcon;
+    cancelFilterIcon.addPixmap(QPixmap(":/images/svg/cancel.svg"),QIcon::Normal,QIcon::On);
+    cancelFilterIcon.addPixmap(QPixmap(":/images/svg/cancel.svg"),QIcon::Normal,QIcon::Off);
+    cancelFilterA->setIcon(cancelFilterIcon);
+    filterToolBar->addAction(cancelFilterA);
+    QWidget* empty = new QWidget();
+    empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    filterToolBar->addWidget(empty);
     searchToolBar = new FixToolBar("Search",this);
     connect(searchToolBar,SIGNAL(orientationChanged(Qt::Orientation)),
             this,SLOT(toolbarOrientationChangedSlot(Qt::Orientation)));
@@ -1089,14 +1105,14 @@ void MainWindow::addWorkSheet(WorkSheetData &wsd)
             messageList.append(msg);
             statusBar()->showMessage(str,3000);
         }
-        workSheet->setUpdatesEnabled(true);
+        //workSheet->setUpdatesEnabled(true);
 
     }
     else {
         workSheet->setMessageAreaExpansion(MessageArea::HeaderItem,wsd.headerExpanded);
         workSheet->setMessageAreaExpansion(MessageArea::FieldsItem,wsd.fieldsExpanded);
         workSheet->setMessageAreaExpansion(MessageArea::TrailerItem,wsd.trailerExpanded);
-        workSheet->setUpdatesEnabled(true);
+       // workSheet->setUpdatesEnabled(true);
 
         workSheetList.append(workSheet);
         str = "Loading of file " + wsd.fileName + " Completed";

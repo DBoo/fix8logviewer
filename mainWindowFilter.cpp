@@ -278,7 +278,6 @@ bool MainWindow::runFilterScript()
     QVariant var,var1;
     QString arg;
     QVector <qint32> filterLogicalIndexes;
-    //qDebug() << "FILTER FUNCTION " << filterFunction.javascript << __FILE__ << __LINE__;
     filterFunctionVal = engine.evaluate(filterFunction.javascript);
     if (tabW->count()  < 1) {
         qWarning() << "Filter Failed, no work sheets" << __FILE__ << __LINE__;
@@ -314,7 +313,16 @@ bool MainWindow::runFilterScript()
         var  = item->data();
         qmsg = (QMessage *) var.value<void *>();
         QVariantList **variantLists;
-        iter.toFront();
+        if ((i%100) == 0) {
+            qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,50);
+            if (cancelFilter) {
+                cancelFilter = false;
+                filterProgressBar->setValue(0);
+                return false;
+            }
+            double value = ((double) i/(double)wsm->rowCount())*100.0;
+            filterProgressBar->setValue(value);
+        }
         variantLists = new QVariantList *[numOfFilterArguments];
         // gets list of all values of messages that apply to search arguments
         int skipPoint = 0;

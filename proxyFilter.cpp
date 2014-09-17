@@ -6,6 +6,7 @@ int ProxyFilter::senderIDRole = Qt::UserRole+2;
 
 ProxyFilter::ProxyFilter(QObject *parent): QSortFilterProxyModel(parent)
 {
+    setDynamicSortFilter(true);
     rowAccepted =  false;
 
 }
@@ -63,6 +64,7 @@ bool ProxyFilter::filterAcceptsRow (int row,
         else
             return false;
     }
+    return false;
 }
 
 bool ProxyFilter::isRowAccepted()

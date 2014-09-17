@@ -406,7 +406,7 @@ bool WorkSheet::loadFileName(QString &fileName,
             dataFile.close();
             if (cancelReason == TERMINATED)  // set from terminate
                 returnCode = TERMINATED;
-            setUpdatesEnabled(true);
+            //setUpdatesEnabled(true);
             return false;
         }
         try {

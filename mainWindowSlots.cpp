@@ -443,3 +443,8 @@ void MainWindow::setFontSlot(QAction *fontAction)
   fnt.setPointSize(ptSize);
   setFont(fnt);
 }
+void MainWindow::cancelFilterSlot()
+{
+    qDebug() << "Cancel Filter" << __FILE__;
+    cancelFilter = true;
+}

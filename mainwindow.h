@@ -125,6 +125,7 @@ public:
     void updateSearchFunctions(SearchFunctionList *);
     protected slots:
     void autoSaveOnSlot(bool);
+    void cancelFilterSlot();
     void cancelSessionRestoreSlot();
     void cancelTabNameSlot();
     void closeSlot();
@@ -209,6 +210,7 @@ protected:
     QAction  *iconsTextOnlyA;
     QAction  *newWindowA;
     QAction  *newTabA;
+    QAction  *cancelFilterA;
     QAction  *copyTabA;
     QAction  *cutTabA;
    // QAction  *linkSearchA; ad latter
@@ -267,6 +269,7 @@ protected:
     QMenu    *schemaScopeMenu;
     QMenu    *popupMenu;
     QMenuBar *mainMenuBar;
+    QProgressBar *filterProgressBar;
     PushButtonModifyKey *configPB;
     QPushButton *cancelEditTabNamePB;
     QPushButton *editTabNamePB;
@@ -377,6 +380,8 @@ private:
     QColor fix8RegColor;
     TableSchema *defaultTableSchema;
     TableSchemaList *schemaList;
+    bool filterRunning;
+    bool cancelFilter;
 };
 
 #endif // MAINWINDOW_H
