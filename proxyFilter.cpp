@@ -6,7 +6,7 @@ int ProxyFilter::senderIDRole = Qt::UserRole+2;
 
 ProxyFilter::ProxyFilter(QObject *parent): QSortFilterProxyModel(parent)
 {
-    setDynamicSortFilter(true);
+    //setDynamicSortFilter(true);
     rowAccepted =  false;
 
 }
@@ -17,10 +17,13 @@ void ProxyFilter::setAcceptedSendIDs(QStringList sendIDs)
 void ProxyFilter::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm)
 {
   logicFilterIndexes = indexes;
+  invalidate();
+
   filterMode = fm;
 }
 void ProxyFilter::setLogicFilterMode(WorkSheetData::FilterMode fm)
 {
+    invalidate();
     filterMode = fm;
 }
 

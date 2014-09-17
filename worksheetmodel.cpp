@@ -148,7 +148,8 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
     int fieldID;
     int rowPos = 0;
     int colPos = 0;
-    setSortRole(Qt::UserRole);
+    quint32 sortRole = Qt::UserRole + 2;
+    setSortRole(sortRole);
 
     if (!tableSchema) {
         qWarning() << "Unable to generate data -  table schema is null" << __FILE__ << __LINE__;
@@ -231,6 +232,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     //intItem->setData(ival,Qt::UserRole);
                     intItem->setData(senderID,senderIDRole);
                     intItem->setData(var);
+                    intItem->setData(ival,sortRole);
                     if (modifyBackgroundColor)
                         intItem->setData(modBGColor, Qt::BackgroundRole);
                     setItem(rowPos,colPos,intItem);
@@ -251,6 +253,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     QStandardItem *strItem = new QStandardItem(QString(ll));
                     strItem->setData(senderID,senderIDRole);
                     strItem->setData(var);
+                    strItem->setData(ll,sortRole);
                     if (modifyBackgroundColor)
                         strItem->setData(modBGColor, Qt::BackgroundRole);
                     setItem(rowPos,colPos,strItem);
@@ -263,6 +266,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     QStandardItem *charItem = new QStandardItem(cstr);
                     charItem->setData(senderID,senderIDRole);
                     charItem->setData(var);
+                    charItem->setData(cstr,sortRole);
                     if (modifyBackgroundColor)
                         charItem->setData(modBGColor, Qt::BackgroundRole);
                     setItem(rowPos,colPos,charItem);
@@ -282,6 +286,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     IntItem *intItem = new IntItem(ival);
                     intItem->setData(senderID,senderIDRole);
                     intItem->setData(var);
+                    intItem->setData(ival,sortRole);
                     if (modifyBackgroundColor)
                         intItem->setData(modBGColor, Qt::BackgroundRole);
                     setItem(rowPos,colPos,intItem);
@@ -299,6 +304,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     bfm->print(c);
                     QStandardItem *strItem = new QStandardItem(QLatin1Literal(c));
                     strItem->setData(senderID,senderIDRole);
+                    strItem->setData(QLatin1Literal(c),sortRole);
                     strItem->setData(var);
                     if (modifyBackgroundColor)
                         strItem->setData(modBGColor, Qt::BackgroundRole);
@@ -310,6 +316,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     QString cstr = ch.decomposition();
                     QStandardItem *charItem = new QStandardItem(cstr);
                     charItem->setData(senderID,senderIDRole);
+                    charItem->setData(cstr,sortRole);
                     charItem->setData(var);
                     if (modifyBackgroundColor)
                         charItem->setData(modBGColor, Qt::BackgroundRole);
@@ -337,6 +344,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                             //qDebug() << tableHeader->name << ", field id = " << fieldID << ", value = " << ival;
                             IntItem *intItem = new IntItem(ival);
                             intItem->setData(senderID,senderIDRole);
+                            intItem->setData(ival,sortRole);
                             intItem->setData(var);
                             if (modifyBackgroundColor)
                                 intItem->setData(modBGColor, Qt::BackgroundRole);
@@ -353,6 +361,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                             bfg->print(c);
                             QStandardItem *strItem = new QStandardItem(QLatin1Literal(c));
                             strItem->setData(senderID,senderIDRole);
+                            strItem->setData(QLatin1Literal(c),sortRole);
                             strItem->setData(var);
                             if (modifyBackgroundColor)
                                 strItem->setData(modBGColor, Qt::BackgroundRole);
@@ -364,6 +373,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                             QString cstr = ch.decomposition();
                             QStandardItem *charItem = new QStandardItem(cstr);
                             charItem->setData(senderID,senderIDRole);
+                            charItem->setData(cstr,sortRole);
                             charItem->setData(var);
                             if (modifyBackgroundColor)
                                 charItem->setData(modBGColor, Qt::BackgroundRole);
@@ -386,6 +396,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                         int ival(static_cast<Field<int, 0>*>(bft)->get());
                         IntItem *intItem = new IntItem(ival);
                         intItem->setData(senderID,senderIDRole);
+                        intItem->setData(ival,sortRole);
                         intItem->setData(var);
                         if (modifyBackgroundColor)
                             intItem->setData(modBGColor, Qt::BackgroundRole);
@@ -403,6 +414,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                         QStandardItem *strItem = new QStandardItem(QLatin1Literal(c));
                         strItem->setData(senderID,senderIDRole);
                         strItem->setData(var);
+                        strItem->setData(QLatin1Literal(c),sortRole);
                         if (modifyBackgroundColor)
                             strItem->setData(modBGColor, Qt::BackgroundRole);
                         setItem(rowPos,colPos,strItem);
@@ -414,6 +426,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                         QStandardItem *charItem = new QStandardItem(cstr);
                         charItem->setData(senderID,senderIDRole);
                         charItem->setData(var);
+                        charItem->setData(cstr,sortRole);
                         if (modifyBackgroundColor)
                             charItem->setData(modBGColor, Qt::BackgroundRole);
                         setItem(rowPos,colPos,charItem);

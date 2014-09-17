@@ -72,7 +72,7 @@ FixTable::FixTable(QUuid &wid, QUuid &wsid,QWidget *p):
 {
     scheduleDelayedItemsLayout();
     proxyFilter = new ProxyFilter(this);
-    proxyFilter->setSortRole(Qt::UserRole +1 );
+    proxyFilter->setSortRole(Qt::UserRole +2 );
     showAnouncement= false;
     anounceFont = font();
     anounceFont.setBold(true);
@@ -181,6 +181,7 @@ void FixTable::validateFilters()
         haveFilter = true;
     if (haveFilter) {
             proxyFilter->setSourceModel(_model);
+            //proxyFilter->setSortRole();
             setModel(proxyFilter);
             fixVH->setProxyFilter(proxyFilter);
             fixVH->setProxyFilterOn(true);
@@ -302,6 +303,7 @@ void  FixTable::mouseMoveEvent(QMouseEvent *event)
 }
 void FixTable::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm)
 {
+    qDebug() << "FIX TABLE SET LOOGIC FILTER INDEXES, count = " << indexes.count() << __FILE__ << __LINE__;
     logicFilterIndexes = indexes;
     filterMode = fm;
     proxyFilter->setLogicFilterIndexes(indexes,fm);
@@ -310,6 +312,7 @@ void FixTable::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::Filt
 void FixTable::setFilterMode(WorkSheetData::FilterMode fm)
 {
  filterMode = fm;
+ qDebug() << ">>>> FIX TABLE SET  FILTER MODE INDEXES, count = " << logicFilterIndexes.count() << __FILE__ << __LINE__;
  proxyFilter->setLogicFilterMode(filterMode);
  validateFilters();
 }
