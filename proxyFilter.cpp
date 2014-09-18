@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QtScript>
 
-int ProxyFilter::senderIDRole = Qt::UserRole+2;
+int ProxyFilter::senderIDRole = Qt::UserRole+3;
 
 ProxyFilter::ProxyFilter(QObject *parent): QSortFilterProxyModel(parent)
 {
@@ -12,6 +12,7 @@ ProxyFilter::ProxyFilter(QObject *parent): QSortFilterProxyModel(parent)
 }
 void ProxyFilter::setAcceptedSendIDs(QStringList sendIDs)
 {
+    invalidate();
     senderIDs = sendIDs;
 }
 void ProxyFilter::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm)

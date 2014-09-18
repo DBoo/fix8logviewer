@@ -363,11 +363,11 @@ void MainWindow::toolbarOrientationChangedSlot(Qt::Orientation orient)
 {
     if (orient == Qt::Vertical) {
         searchL->setText("");
-        searchLV->setText("Search");
+        //searchLV->setText("Search");
     }
     else {
         searchL->setText("Search");
-        searchLV->setText("");
+        //searchLV->setText("");
     }
 }
 void MainWindow::modelDroppedSlot(FixMimeData *m)

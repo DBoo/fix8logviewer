@@ -306,6 +306,8 @@ bool MainWindow::runFilterScript()
     QStringListIterator iter(filterArgList);
     //qDebug() << "\tNum of filter args  = " << filterArgList.count();
     //qDebug() << "\tFilter List:" << filterArgList;
+    filterProgressBar->show();
+
     for(int i=0;i<wsm->rowCount();i++) {
         skip = false;
         args.clear();
@@ -318,6 +320,8 @@ bool MainWindow::runFilterScript()
             if (cancelFilter) {
                 cancelFilter = false;
                 filterProgressBar->setValue(0);
+                filterProgressBar->hide();
+
                 return false;
             }
             double value = ((double) i/(double)wsm->rowCount())*100.0;
@@ -426,6 +430,8 @@ bool MainWindow::runFilterScript()
     }
     WorkSheetData::FilterMode filterMode = (WorkSheetData::FilterMode) filterButtonGroup->checkedId();
     ws->setFilterIndexes(filterLogicalIndexes,filterMode); // add mode to this
+    filterProgressBar->setValue(100);
+    hideFilterProgressBarTimeID = startTimer(2000);
     update();
     updateMessageArea();
     return true;

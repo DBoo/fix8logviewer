@@ -46,7 +46,7 @@ using namespace FIX8;
 #include <QFuture>
 #include <QList>
 
-int WorkSheetModel::senderIDRole = Qt::UserRole+2;
+int WorkSheetModel::senderIDRole = Qt::UserRole+3;
 
 
 
@@ -234,7 +234,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     intItem->setData(var);
                     intItem->setData(ival,sortRole);
                     if (modifyBackgroundColor)
-                        intItem->setData(modBGColor, Qt::BackgroundRole);
+                       intItem->setData(modBGColor, Qt::BackgroundRole);
                     setItem(rowPos,colPos,intItem);
                     found = true;
                 }

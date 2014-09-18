@@ -200,11 +200,19 @@ void MainWindow::buildMainWindow()
     filterL = new QLabel(filterArea);
     filterL->setText(tr("Filter:"));
     filterLineEdit = new LineEdit(filterArea);
+    QFontMetrics fm1(filterLineEdit->font());
+    filterLineEdit->setMinimumWidth(fm1.averageCharWidth()*36);
     connect(filterLineEdit,SIGNAL(textChanged()),this,SLOT(filterTextChangedSlot()));
     connect(filterLineEdit,SIGNAL(returnPressed()),this,SLOT(filterReturnSlot()));
     filterLineEdit->setWhatsThis("Filter critera. Can be any Javascript\nEg: MsgType=='8' && AvgPx > 10.0");
-    filterBox->addWidget(filterL,0);
+    filterBox->addWidget(filterL,0,Qt::AlignLeft);
     filterBox->addWidget(filterLineEdit,1);
+
+    filterTypeArea = new QWidget(this);
+    QHBoxLayout *filterTypeBox = new QHBoxLayout();
+    filterTypeBox->setMargin(0);
+    filterTypeArea->setLayout(filterTypeBox);
+
     filterButtonGroup = new QButtonGroup(this);
     excludeFilterB = new QRadioButton("Exclude",this);
     excludeFilterB->setToolTip("Apply Filter to \'exlude\' by rule");
@@ -220,9 +228,9 @@ void MainWindow::buildMainWindow()
     offFilterB->setChecked(true);
     connect(filterButtonGroup,SIGNAL(buttonClicked(int)),this,SLOT(filterModeChangedSlot(int)));
 
-    filterBox->addWidget(excludeFilterB,0);
-    filterBox->addWidget(includeFilterB,0);
-    filterBox->addWidget(offFilterB,0);
+    filterTypeBox->addWidget(excludeFilterB,0);
+    filterTypeBox->addWidget(includeFilterB,0);
+    filterTypeBox->addWidget(offFilterB,0);
 
     QWidget *filterSelectArea = new QWidget(this);
     QHBoxLayout *filterSelectBox = new QHBoxLayout();
@@ -242,6 +250,7 @@ void MainWindow::buildMainWindow()
 
     filterSelectBox->addWidget(filterSelectL,0);
     filterSelectBox->addWidget(filterSelectCB,1);
+
 
     editFilterA= new QAction("&Filter Editor",this);
     editFilterA->setIconText("Edit");
@@ -263,6 +272,7 @@ void MainWindow::buildMainWindow()
     //searchToolBar->addWidget(searchLV);
     filterToolBar->addWidget(filterArea);
     filterToolBar->addAction(saveFilterFuncA);
+    filterToolBar->addWidget(filterTypeArea);
     filterToolBar->addAction(editFilterA);
 
     filterProgressBar = new QProgressBar(filterToolBar);
@@ -270,18 +280,23 @@ void MainWindow::buildMainWindow()
     filterProgressBar->setMaximum(100);
     filterProgressBar->setToolTip("Filtering Completed");
     filterSelectBox->addSpacing(32);
-    filterSelectBox->addWidget(filterProgressBar);
+    filterSelectBox->addWidget(filterProgressBar,1);
+    filterSelectBox->addStretch(1);
+
+    filterProgressBar->hide();
+    filterSelectArea->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     filterToolBar->addWidget(filterSelectArea);
-    cancelFilterA = new QAction("Cancel Filter",this);
-    connect(cancelFilterA,SIGNAL(triggered()),this,SLOT(cancelFilterSlot()));
+    //filterToolBar->addWidget(filterProgressBar);
+    //cancelFilterA = new QAction("Cancel Filter",this);
+    //connect(cancelFilterA,SIGNAL(triggered()),this,SLOT(cancelFilterSlot()));
     QIcon cancelFilterIcon;
     cancelFilterIcon.addPixmap(QPixmap(":/images/svg/cancel.svg"),QIcon::Normal,QIcon::On);
     cancelFilterIcon.addPixmap(QPixmap(":/images/svg/cancel.svg"),QIcon::Normal,QIcon::Off);
-    cancelFilterA->setIcon(cancelFilterIcon);
-    filterToolBar->addAction(cancelFilterA);
-    QWidget* empty = new QWidget();
-    empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-    filterToolBar->addWidget(empty);
+    //cancelFilterA->setIcon(cancelFilterIcon);
+    //filterToolBar->addAction(cancelFilterA);
+    //QWidget* empty = new QWidget();
+    //empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    //filterToolBar->addWidget(empty);
     searchToolBar = new FixToolBar("Search",this);
     connect(searchToolBar,SIGNAL(orientationChanged(Qt::Orientation)),
             this,SLOT(toolbarOrientationChangedSlot(Qt::Orientation)));
@@ -379,8 +394,6 @@ void MainWindow::buildMainWindow()
     showIcon.addPixmap(QPixmap(":/images/svg/hideMessageArea.svg"),QIcon::Normal,QIcon::On);
     showMessageA->setIcon(showIcon);
 
-
-
     filterSenderMenuA = new QAction("Sender",this);
     filterSenderMenuA->setIcon(QIcon(":/images/svg/filterSender.svg"));
     filterSenderMenuA->setToolTip("Filter Out Messages By SenderID");
@@ -393,8 +406,7 @@ void MainWindow::buildMainWindow()
     saveIcon.addPixmap(QPixmap(":/images/svg/saveEnabled.svg"),QIcon::Normal,QIcon::On);
     saveIcon.addPixmap(QPixmap(":/images/svg/saveDisabled.svg"),QIcon::Normal,QIcon::Off);
     */
- saveSearchFuncA  = new QAction("Save",this);
-
+    saveSearchFuncA  = new QAction("Save",this);
     saveSearchFuncA->setIcon(saveIcon);
     saveSearchFuncA->setToolTip(tr("Save this search criteria"));
     saveSearchFuncA->setWhatsThis(tr("Save search string to database so it can be reused latter"));
@@ -428,8 +440,7 @@ void MainWindow::buildMainWindow()
     QSize stoolbar = searchToolBar->iconSize();
     QPixmap searchEditPM(":/images/svg/searchEdit.svg");
     int ht = stoolbar.height()*.66;
-    searchEditA->setIcon(searchEditPM.scaledToHeight(ht));
-    searchLV = new QLabel(searchToolBar);// only show when toobar is vertial
+    searchEditA->setIcon(searchEditPM); //.scaledToHeight(ht));
     searchArea = new QWidget(this);
     QHBoxLayout *searchBox = new QHBoxLayout();
     searchBox->setMargin(0);
@@ -449,6 +460,18 @@ void MainWindow::buildMainWindow()
     searchL->setText(tr("Search:"));
     searchLineEdit = new LineEdit(searchArea);
     searchLineEdit->setWhatsThis("Search critera. Can be any Javascript\nEg: MsgType=='8' && AvgPx > 10.0");
+    searchCompleter = new QCompleter(this);
+    searchCompleter->setCompletionMode(QCompleter::InlineCompletion);
+    searchCompleter->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    searchCompleter->setWrapAround(false);
+    searchLineEdit->setCompleter(searchCompleter);
+    searchLineEdit->setMinimumWidth(fm1.averageCharWidth()*36);
+
+    connect(searchLineEdit,SIGNAL(textChanged()),this,SLOT(searchTextChangedSlot()));
+    connect(searchLineEdit,SIGNAL(returnPressed()),this,SLOT(searchReturnSlot()));
+    searchBox->addWidget(searchL,0,Qt::AlignLeft);
+    searchBox->addWidget(searchLineEdit,1);
 
     QWidget *searchSelectArea = new QWidget(this);
     QHBoxLayout *searchSelectBox = new QHBoxLayout();
@@ -469,27 +492,15 @@ void MainWindow::buildMainWindow()
     searchSelectBox->addWidget(searchSelectL,0);
     searchSelectBox->addWidget(searchSelectCB,1);
     searchSelectBox->addStretch(1);
+    //searchSelectBox->addStretch(1);
 
-    searchCompleter = new QCompleter(this);
-
-    searchCompleter->setCompletionMode(QCompleter::InlineCompletion);
-    searchCompleter->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
-    searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    searchCompleter->setWrapAround(false);
-    searchLineEdit->setCompleter(searchCompleter);
 
     filterLineEdit->setCompleter(searchCompleter);
 
-    QFontMetrics fm1(searchLineEdit->font());
-    searchLineEdit->setMinimumWidth(fm1.averageCharWidth()*32);
     editHighlighter = new EditHighLighter(searchLineEdit->document());
     filterEditHighlighter  = new EditHighLighter(filterLineEdit->document());
-    connect(searchLineEdit,SIGNAL(textChanged()),this,SLOT(searchTextChangedSlot()));
-    connect(searchLineEdit,SIGNAL(returnPressed()),this,SLOT(searchReturnSlot()));
-    searchBox->addWidget(searchL,0);
-    searchBox->addWidget(searchLineEdit,1);
+    ;
     //searchToolBar->addAction(linkSearchA);
-    searchToolBar->addWidget(searchLV);
     searchToolBar->addWidget(searchArea);
     searchToolBar->addAction(saveSearchFuncA);
     searchToolBar->addAction(searchBeginA);
@@ -497,21 +508,28 @@ void MainWindow::buildMainWindow()
     searchToolBar->addAction(searchNextA);
     searchToolBar->addAction(searchEndA);
     searchToolBar->addAction(searchEditA);
+
+    searchProgressBar = new QProgressBar(filterToolBar);
+    searchProgressBar->setMinimum(0);
+    searchProgressBar->setMaximum(100);
+    searchProgressBar->setToolTip("Filtering Completed");
+
+    searchProgressBar->hide();
+    searchSelectBox->addSpacing(32);
+    searchSelectBox->addWidget(searchProgressBar);
     searchToolBar->addWidget(searchSelectArea);
+    QWidget* empty2 = new QWidget();
+    empty2->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    searchToolBar->addWidget(empty2);
 
 
     whatsThisA = QWhatsThis::createAction(this);
     whatsThisA->setIcon(QIcon(":/images/svg/help-contents.svg"));
     whatsThisA->setToolTip("Provides brief description of  icons and buttons");
 
-    QHBoxLayout *space = new QHBoxLayout();
-    space->addStretch(1);
-    space->setMargin(0);
-    QWidget *spaceW = new QWidget();
-    spaceW->setLayout(space);
 
-    searchArea->setLayout(searchBox);
-    searchToolBar->addWidget(spaceW);
+
+
     setDockOptions(QMainWindow::AnimatedDocks | QMainWindow::AllowTabbedDocks);
     consoleDock = new QDockWidget(tr("Console"),this);
     consoleDock->setObjectName("ConsoleDock");
@@ -898,7 +916,11 @@ void MainWindow::showEvent(QShowEvent *se)
 }
 void MainWindow::timerEvent(QTimerEvent *te)
 {
-
+    if (te->timerId() == hideFilterProgressBarTimeID) {
+        killTimer(hideFilterProgressBarTimeID);
+        filterProgressBar->setValue(0);
+        filterProgressBar->hide();
+    }
 }
 QSize MainWindow::sizeHint() const
 {
@@ -1402,4 +1424,23 @@ void MainWindow::setSharedLibrary(Fix8SharedLib *f8sl)
 Fix8SharedLib * MainWindow::getSharedLibrary()
 {
     return sharedLib;
+}
+void MainWindow::resizeEvent(QResizeEvent *re)
+{
+    QFont fnt = filterL->font();
+    QFontMetrics fm(fnt);
+    int size1 = fm.width(filterL->text());
+    int size2 = fm.width(searchL->text());
+    int m = qMax(size1,size2);
+    m = m + (m*.10);
+    filterL->setFixedWidth(m);
+    searchL->setFixedWidth(m);
+
+    size1 = filterLineEdit->width();
+    size2 = searchLineEdit->width();
+    m = qMax(size1,size2);
+    filterLineEdit->setMinimumWidth(m); //,filterLineEdit->height());
+    searchLineEdit->setMinimumWidth(m); //,searchLineEdit->height());
+
+    QMainWindow::resizeEvent(re);
 }

@@ -252,7 +252,7 @@ protected:
     QLabel   *schemaL;
     QLabel   *schemaV;
     QLabel   *searchL;
-    QLabel   *searchLV; // searchLagle to show when vertical
+    //QLabel   *searchLV; // searchLagle to show when vertical
     NoDataLabel   *noDataL;
     QLineEdit *tabNameLineEdit;
     QMap     <int,QAction *> schemaActionMap;
@@ -270,6 +270,7 @@ protected:
     QMenu    *popupMenu;
     QMenuBar *mainMenuBar;
     QProgressBar *filterProgressBar;
+    QProgressBar *searchProgressBar;
     PushButtonModifyKey *configPB;
     QPushButton *cancelEditTabNamePB;
     QPushButton *editTabNamePB;
@@ -292,6 +293,7 @@ protected:
     QList <FixTable *> fixTableLists;
     QWidget *progressWidget;
     QWidget *filterArea;
+    QWidget *filterTypeArea;
     QWidget *searchArea;
     QWidget *tabNameEditArea;
     QWhatsThis *whatsThis;
@@ -302,6 +304,7 @@ protected:
     void setAutoSaveOn(bool);
     void showEvent(QShowEvent *);
     QSize sizeHint() const;
+    void resizeEvent(QResizeEvent *);
     void timerEvent(QTimerEvent *);
     void writeSettings();
 signals:
@@ -382,6 +385,7 @@ private:
     TableSchemaList *schemaList;
     bool filterRunning;
     bool cancelFilter;
+    qint32 hideFilterProgressBarTimeID;
 };
 
 #endif // MAINWINDOW_H

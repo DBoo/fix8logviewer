@@ -161,6 +161,7 @@ void FixTable::setAnouncement(const QString &message,int interval)
 void FixTable::setSenderIDFilter(QStringList ids)
 {
     senderIDs = ids;
+    qDebug() << "FixTable::setSenderIDFilter to " << ids << __FILE__ << __LINE__;
     proxyFilter->setAcceptedSendIDs(senderIDs);
     validateFilters();
     update();
@@ -180,6 +181,7 @@ void FixTable::validateFilters()
     else if (filterMode != WorkSheetData::Off)
         haveFilter = true;
     if (haveFilter) {
+            qDebug() << "HAVE FILTER" << __FILE__ << __LINE__;
             proxyFilter->setSourceModel(_model);
             //proxyFilter->setSortRole();
             setModel(proxyFilter);
