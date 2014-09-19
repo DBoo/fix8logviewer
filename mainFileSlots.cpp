@@ -132,7 +132,7 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
         QFileInfo fi(fileName);
         WorkSheet *workSheet = new WorkSheet(this);
         workSheet->setSharedLib(sharedLib);
-        workSheet->setTableSchema(tableSchema);
+        //workSheet->setTableSchema(tableSchema);
         connect(workSheet,SIGNAL(notifyTimeFormatChanged(GUI::Globals::TimeFormat)),
                 this,SLOT(setTimeSlotFromWorkSheet(GUI::Globals::TimeFormat)));
         connect(workSheet,SIGNAL(modelDropped(FixMimeData *)),
@@ -156,7 +156,7 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
         //workSheet->setUpdatesEnabled(false);
         setCursor(Qt::BusyCursor);
 
-        bstatus = workSheet->loadFileName(fileName,messageList,returnStatus);
+        bstatus = workSheet->loadFileName(fileName,messageList,tableSchema,returnStatus);
         unsetCursor();
         if (!bstatus) {
             if (returnStatus == WorkSheet::TERMINATED) {
@@ -241,7 +241,7 @@ void MainWindow::loadFile(QString &fileName)
     }
     WorkSheet *workSheet = new WorkSheet(this);
      workSheet->setSharedLib(sharedLib);
-    workSheet->setTableSchema(tableSchema);
+   // workSheet->setTableSchema(tableSchema);
     connect(workSheet,SIGNAL(notifyTimeFormatChanged(GUI::Globals::TimeFormat)),
             this,SLOT(setTimeSlotFromWorkSheet(GUI::Globals::TimeFormat)));
     connect(workSheet,SIGNAL(modelDropped(FixMimeData *)),
@@ -265,7 +265,7 @@ void MainWindow::loadFile(QString &fileName)
     //workSheet->setUpdatesEnabled(false);
     setCursor(Qt::BusyCursor);
 
-    bstatus = workSheet->loadFileName(fileName,messageList,returnStatus);
+    bstatus = workSheet->loadFileName(fileName,messageList,tableSchema,returnStatus);
     unsetCursor();
     if (!bstatus) {
         if (returnStatus == WorkSheet::TERMINATED) {

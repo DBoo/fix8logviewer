@@ -134,6 +134,7 @@ class FieldUseList : public QList <FieldUse *>
 class QMessage
 {
   public:
+    QMessage();
     QMessage(Message *m,QLatin1String senderID,std::function<const F8MetaCntx&()> ctxFunc);
     QMessage(Message *m,QLatin1String senderID, int seqID,std::function<const F8MetaCntx&()> ctxFunc);
     QMessage(const QMessage &);
@@ -141,9 +142,9 @@ class QMessage
     QString senderID;
     QMultiMap <QString, QVariant > map;
     int seqID;
+    std::function<const F8MetaCntx&()> ctxFunc;
 private:
     void generateItems(GroupBase *gb);
-    std::function<const F8MetaCntx&()> ctxFunc;
 
 };
 class QMessageList : public QList <QMessage *>

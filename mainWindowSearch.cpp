@@ -320,7 +320,7 @@ bool MainWindow::runSearchScript()
             variantLists[j] = new QVariantList();
             arg = searchArgList.at(j);
             if (qmsg->map.contains(arg)) {
-                qDebug() << "\t\tMessage contains arg...." << __FILE__ << __LINE__;
+                //qDebug() << "\t\tMessage contains arg...." << __FILE__ << __LINE__;
                 QMultiMap<QString,QVariant>::iterator miter = qmsg->map.find(arg);
                 while (miter != qmsg->map.end() &&  miter.key() == arg) {
                     var1 = miter.value();

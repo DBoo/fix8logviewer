@@ -150,6 +150,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
     int colPos = 0;
     quint32 sortRole = Qt::UserRole + 2;
     setSortRole(sortRole);
+    setRowCount(0);
 
     if (!tableSchema) {
         qWarning() << "Unable to generate data -  table schema is null" << __FILE__ << __LINE__;
@@ -162,7 +163,6 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
     }
     if (!messageList) {
         qWarning() << "Unable to generate data -  message list is null" << __FILE__ << __LINE__;
-        setRowCount(0);
         return;
     }
 
@@ -176,10 +176,10 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
     QElapsedTimer myTimer;
     myTimer.start();
     int messageCount = messageList->count();
-    setRowCount(messageCount);
+    //setRowCount(messageCount);
 
     while(mIter.hasNext()) {
-        if (rowPos%numOfLines == 0) { // every 100 iterations allow gui to process events
+        if ((rowPos%numOfLines) == 0) { // every 100 iterations allow gui to process events
             numOfLineChecksCalled++;
             if (numOfLineChecksCalled > 5)
                 numOfLines = 1000;
@@ -187,6 +187,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                 qDebug() << "CANCEL LOAD IN GENERATE DATA " << __FILE__ << __LINE__;
                 return;
             }
+            /*
             WorkSheet *w = qobject_cast <WorkSheet *> (parent());
             if (w) {
                 w->setUpdatesEnabled(true);
@@ -196,6 +197,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
 
                 w->setUpdatesEnabled(false);
             }
+            */
         }
         qmessage = mIter.next();
         QString senderID = qmessage->senderID;
@@ -214,6 +216,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
         tableHeaderIter.toFront();
         colPos = 0;
         bool found;
+        QList <QStandardItem *>items;
         while(tableHeaderIter.hasNext()) {
             found = false;
             tableHeader = tableHeaderIter.next();
@@ -235,7 +238,8 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     intItem->setData(ival,sortRole);
                     if (modifyBackgroundColor)
                        intItem->setData(modBGColor, Qt::BackgroundRole);
-                    setItem(rowPos,colPos,intItem);
+                    //setItem(rowPos,colPos,intItem);
+                    items.append(intItem);
                     found = true;
                 }
 
@@ -256,7 +260,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     strItem->setData(ll,sortRole);
                     if (modifyBackgroundColor)
                         strItem->setData(modBGColor, Qt::BackgroundRole);
-                    setItem(rowPos,colPos,strItem);
+                    //setItem(rowPos,colPos,strItem);
+                    items.append(strItem);
+
                     found = true;
 
                 }
@@ -269,7 +275,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     charItem->setData(cstr,sortRole);
                     if (modifyBackgroundColor)
                         charItem->setData(modBGColor, Qt::BackgroundRole);
-                    setItem(rowPos,colPos,charItem);
+                    //setItem(rowPos,colPos,charItem);
+                    items.append(charItem);
+
                     found = true;
 
                 }
@@ -289,7 +297,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     intItem->setData(ival,sortRole);
                     if (modifyBackgroundColor)
                         intItem->setData(modBGColor, Qt::BackgroundRole);
-                    setItem(rowPos,colPos,intItem);
+                    // setItem(rowPos,colPos,intItem);
+                    items.append(intItem);
+
                     found = true;
 
                 }
@@ -308,7 +318,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     strItem->setData(var);
                     if (modifyBackgroundColor)
                         strItem->setData(modBGColor, Qt::BackgroundRole);
-                    setItem(rowPos,colPos,strItem);
+                    //setItem(rowPos,colPos,strItem);
+                    items.append(strItem);
+
                     found = true;
                 }
                 else if (FieldTrait::is_char(ft)) {
@@ -320,7 +332,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                     charItem->setData(var);
                     if (modifyBackgroundColor)
                         charItem->setData(modBGColor, Qt::BackgroundRole);
-                    setItem(rowPos,colPos,charItem);
+                    //setItem(rowPos,colPos,charItem);
+                    items.append(charItem);
+
                     found = true;
                 }
             }
@@ -348,7 +362,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                             intItem->setData(var);
                             if (modifyBackgroundColor)
                                 intItem->setData(modBGColor, Qt::BackgroundRole);
-                            setItem(rowPos,colPos,intItem);
+                            //setItem(rowPos,colPos,intItem);
+                            items.append(intItem);
+
                             found = true;
                         }
                         else if (FieldTrait::is_float(ft)) {
@@ -365,7 +381,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                             strItem->setData(var);
                             if (modifyBackgroundColor)
                                 strItem->setData(modBGColor, Qt::BackgroundRole);
-                            setItem(rowPos,colPos,strItem);
+                            //setItem(rowPos,colPos,strItem);
+                            items.append(strItem);
+
                             found = true;
                         }
                         else if (FieldTrait::is_char(ft)) {
@@ -377,7 +395,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                             charItem->setData(var);
                             if (modifyBackgroundColor)
                                 charItem->setData(modBGColor, Qt::BackgroundRole);
-                            setItem(rowPos,colPos,charItem);
+                           // setItem(rowPos,colPos,charItem);
+                            items.append(charItem);
+
                             found = true;
                         }
                     }
@@ -400,7 +420,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                         intItem->setData(var);
                         if (modifyBackgroundColor)
                             intItem->setData(modBGColor, Qt::BackgroundRole);
-                        setItem(rowPos,colPos,intItem);
+                        //setItem(rowPos,colPos,intItem);
+                        items.append(intItem);
+
                         found = true;
                     }
                     else if (FieldTrait::is_float(ft)) {
@@ -417,7 +439,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                         strItem->setData(QLatin1Literal(c),sortRole);
                         if (modifyBackgroundColor)
                             strItem->setData(modBGColor, Qt::BackgroundRole);
-                        setItem(rowPos,colPos,strItem);
+                        //setItem(rowPos,colPos,strItem);
+                        items.append(strItem);
+
                         found = true;
                     }
                     else if (FieldTrait::is_char(ft)) {
@@ -429,7 +453,9 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                         charItem->setData(cstr,sortRole);
                         if (modifyBackgroundColor)
                             charItem->setData(modBGColor, Qt::BackgroundRole);
-                        setItem(rowPos,colPos,charItem);
+                       // setItem(rowPos,colPos,charItem);
+                        items.append(charItem);
+
                         found = true;
                     }
                 }
@@ -444,10 +470,13 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                 dummyItem->setData(var);
                 if (modifyBackgroundColor)
                     dummyItem->setData(modBGColor, Qt::BackgroundRole);
-                setItem(rowPos,colPos,dummyItem);
+                //setItem(rowPos,colPos,dummyItem);
+                items.append(dummyItem);
+
             }
             colPos++;
         }
+        appendRow(items);
         rowPos++;
     }
     int nMilliseconds = myTimer.elapsed();

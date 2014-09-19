@@ -70,31 +70,7 @@ WorkSheet::WorkSheet(QWidget *parent ) : QWidget(parent),
 {
     build();
     _model = new WorkSheetModel(this);
-    _model->setWorkSheet(this);
-    connect(_model,SIGNAL(updateTable()),this,SLOT(updateTableSlot()),Qt::DirectConnection);
-    fixTable->setWorkSheetModel(_model);
-    sm = fixTable->selectionModel();
-    fixTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    /*
-    for(int i=0;i<NumColumns;i++) {
-        headerItem[i] = new QStandardItem(headerLabel[i]);
-        _model->setHorizontalHeaderItem(i,headerItem[i]);
-        if (i==WorkSheet::SendingTime)
-            headerItem[i]->setToolTip("Right click to select time format");
-    }
 
-    dateTimeDelegate = new DateTimeDelegate(this);
-    fixTable->setItemDelegateForColumn(FixTable::SendingTime,
-                                       dateTimeDelegate);
-*/
-    FixHeaderView *fixHeader = qobject_cast <FixHeaderView *> (fixTable->horizontalHeader());
-    connect(fixHeader,SIGNAL(doPopup(int,QPoint)),
-            this,SLOT(popupHeaderMenuSlot(int,const QPoint &)));
-    fixHeader->setSectionResizeMode(QHeaderView::Interactive);
-    fixHeader->setStretchLastSection(true);
-    fixHeader->setSectionsMovable(true);
-    fixHeader->setSortIndicatorShown(true);
-    setTimeFormat(GUI::Globals::timeFormat);
 
 }
 bool WorkSheet::copyFrom(WorkSheet &oldws)
@@ -359,9 +335,10 @@ void WorkSheet::terminate()
 }
 bool WorkSheet::loadFileName(QString &fileName,
                              QList <GUI::ConsoleMessage> &msgList,
-                             quint32 &returnCode)
+                             TableSchema *ts, quint32 &returnCode)
 {
     fixFileName = fileName;
+    tableSchema = ts;
     QFileInfo fi(fixFileName);
     bool bstatus;
     msg_type mt;
@@ -401,6 +378,7 @@ bool WorkSheet::loadFileName(QString &fileName,
     myTimer.start();
     QMap <QString, qint32> senderMap; // <sender id, numofoccurances>
     messageList = new QMessageList();
+    QMessage *messageArray = new QMessage[linecount];
     while(!dataFile.atEnd()) {
         if (cancelLoad) {
             dataFile.close();
@@ -422,7 +400,12 @@ bool WorkSheet::loadFileName(QString &fileName,
             memset(c,'\0',60);
             senderID.print(c);
             QLatin1String sid(c);
-            QMessage *qmessage = new QMessage(msg,sid,snum(),sharedLib->ctxFunc);
+            //QMessage *qmessage = new QMessage(msg,sid,snum(),sharedLib->ctxFunc);
+            messageArray[i].mesg = msg;
+            messageArray[i].senderID = sid;
+            messageArray[i].ctxFunc = sharedLib->ctxFunc;
+
+
             if (i%100 == 0) { // every 100 iterations allow gui to process events
                 if (cancelLoad) {
                     showLoadProcess(false);
@@ -441,7 +424,8 @@ bool WorkSheet::loadFileName(QString &fileName,
             else {
                 senderMap.insert(sid,1);
             }
-            messageList->append(qmessage);
+            //messageList->append(qmessage);
+            messageList->append(&messageArray[i]);
         }
         catch (f8Exception&  e){
             errorStr =  "Error - Invalid data in file: " + fileName + ", on  row: " + QString::number(i);
@@ -495,9 +479,37 @@ bool WorkSheet::loadFileName(QString &fileName,
     showAllSendersA = new QAction("Show All",this);
     senderActionGroup->addAction(showAllSendersA);
     senderMenu->addAction(showAllSendersA);
-    fixTable->setSortingEnabled(false);
 
+    _model->setWorkSheet(this);
+    if (!tableSchema)
+        return false;
+
+    QStringListIterator colNameIter(tableSchema->fieldNames);
+    i=0;
+    QString colName;
+    QMap <QString, qint16> columnMap;
+
+    while(colNameIter.hasNext()) {
+        colName = colNameIter.next();
+        columnMap[colName] = i;
+        i++;
+    }
+     _model->setTableSchema(*tableSchema);
     _model->setMessageList(messageList,cancelLoad);
+    connect(_model,SIGNAL(updateTable()),this,SLOT(updateTableSlot()),Qt::DirectConnection);
+    fixTable->setWorkSheetModel(_model);
+    sm = fixTable->selectionModel();
+    fixTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    FixHeaderView *fixHeader = qobject_cast <FixHeaderView *> (fixTable->horizontalHeader());
+    connect(fixHeader,SIGNAL(doPopup(int,QPoint)),
+            this,SLOT(popupHeaderMenuSlot(int,const QPoint &)));
+    fixHeader->setSectionResizeMode(QHeaderView::Interactive);
+    fixHeader->setStretchLastSection(true);
+    fixHeader->setSectionsMovable(true);
+    fixHeader->setSortIndicatorShown(true);
+    setTimeFormat(GUI::Globals::timeFormat);
+
     fixTable->setSortingEnabled(true);
 
     qstr = QString::number(_model->rowCount()) + tr(" Messages were read from file: ") + fileName;

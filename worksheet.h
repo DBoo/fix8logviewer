@@ -106,7 +106,7 @@ public:
     WorkSheetData getWorksheetData();
     bool loadFileName(QString &fileName,
                       QList <GUI::ConsoleMessage> &returnMessageList,
-                      quint32 &returnCode);
+                      TableSchema *ts,quint32 &returnCode);
     void hideColumn(int colNum, bool hideCol);
     void setAlias(QString &);
     void showLoadProcess(bool isBeingLoaded, int numRecords=0);

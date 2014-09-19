@@ -1063,7 +1063,7 @@ void MainWindow::addWorkSheet(WorkSheetData &wsd)
 
     WorkSheet *workSheet = new WorkSheet(this);
     workSheet->setSharedLib(sharedLib);
-    workSheet->setTableSchema(tableSchema);
+    //workSheet->setTableSchema(tableSchema);
     connect(workSheet,SIGNAL(notifyTimeFormatChanged(GUI::Globals::TimeFormat)),
             this,SLOT(setTimeSlotFromWorkSheet(GUI::Globals::TimeFormat)));
     connect(workSheet,SIGNAL(modelDropped(FixMimeData *)),
@@ -1092,7 +1092,7 @@ void MainWindow::addWorkSheet(WorkSheetData &wsd)
     tabW->setCurrentWidget(workSheet);
     stackW->setCurrentWidget(workAreaSplitter);
     //workSheet->setUpdatesEnabled(false);
-    bstatus = workSheet->loadFileName(wsd.fileName,messageList,returnStatus);
+    bstatus = workSheet->loadFileName(wsd.fileName,messageList,tableSchema,returnStatus);
     if (!bstatus) {
         if (returnStatus == WorkSheet::TERMINATED) {
             str = "Loading of file: " + wsd.fileName + " was terminated.";

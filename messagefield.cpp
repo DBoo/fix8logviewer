@@ -272,6 +272,10 @@ QMessage::QMessage(Message *m,QLatin1String sid,std::function<const F8MetaCntx&(
 {
     seqID = -1;
 }
+QMessage::QMessage()
+{
+
+}
 QMessage::QMessage(Message *m,QLatin1String sid, int seq,std::function<const F8MetaCntx&()> ctxF):mesg(m),senderID(sid),
     seqID(seq),ctxFunc(ctxF)
 {
