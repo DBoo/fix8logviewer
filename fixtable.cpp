@@ -118,9 +118,10 @@ FixTable::~FixTable()
 void FixTable::setWorkSheetModel(WorkSheetModel *m)
 {
     _model = m;
-    proxyFilter->setSourceModel(_model);
     fixVH->setWorkModel(_model);
     setModel(m);
+    proxyFilter->setSourceModel(_model);
+
 }
 void FixTable::setWindowID(QUuid &uuid)
 {
@@ -308,7 +309,13 @@ void FixTable::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::Filt
     qDebug() << "FIX TABLE SET LOOGIC FILTER INDEXES, count = " << indexes.count() << __FILE__ << __LINE__;
     logicFilterIndexes = indexes;
     filterMode = fm;
+    delete proxyFilter;
+    proxyFilter = new ProxyFilter(this);
+    setSortingEnabled(false);
+    proxyFilter->setSourceModel(_model);
+    proxyFilter->setSortRole(Qt::UserRole +2 );
     proxyFilter->setLogicFilterIndexes(indexes,fm);
+    setSortingEnabled(true);
     validateFilters();
 }
 void FixTable::setFilterMode(WorkSheetData::FilterMode fm)

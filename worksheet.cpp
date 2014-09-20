@@ -52,6 +52,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "threadloader.h"
 #include "worksheetmodel.h"
 #include <QDebug>
+#include <QtConcurrent>
 #include <QMap>
 #include <QQuickView>
 #include <QtWidgets>
@@ -63,6 +64,10 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 using namespace FIX8;
 
+void threadLoadMessage(QMessage *qm,Message *m,QLatin1String senderID,int seq,std::function<const F8MetaCntx&()> ctxFunc)
+{
+   qm->set(m,senderID,seq,ctxFunc);
+}
 
 WorkSheet::WorkSheet(QWidget *parent ) : QWidget(parent),
     senderMenu(0),cancelLoad(false),tableSchema(0),messageList(0),
@@ -379,6 +384,9 @@ bool WorkSheet::loadFileName(QString &fileName,
     QMap <QString, qint32> senderMap; // <sender id, numofoccurances>
     messageList = new QMessageList();
     QMessage *messageArray = new QMessage[linecount];
+
+    char c[60];
+    int goodRows = 0;
     while(!dataFile.atEnd()) {
         if (cancelLoad) {
             dataFile.close();
@@ -395,23 +403,23 @@ bool WorkSheet::loadFileName(QString &fileName,
             Message *msg = Message::factory(sharedLib->ctxFunc(),ba.data());
             msg->Header()->get(snum);
             msg->Header()->get(senderID);
-
-            char c[60];
             memset(c,'\0',60);
             senderID.print(c);
             QLatin1String sid(c);
             //QMessage *qmessage = new QMessage(msg,sid,snum(),sharedLib->ctxFunc);
-            messageArray[i].mesg = msg;
-            messageArray[i].senderID = sid;
-            messageArray[i].ctxFunc = sharedLib->ctxFunc;
+            //QMessage *m = &(messageIter.next());
 
+            //messageArray[i].mesg = msg;
+            //messageArray[i].senderID = sid;
+            //messageArray[i].ctxFunc = sharedLib->ctxFunc;
+            // multhreading here
+            QtConcurrent::run(threadLoadMessage,&messageArray[i], msg,sid,snum(),sharedLib->ctxFunc);
 
-            if (i%100 == 0) { // every 100 iterations allow gui to process events
+            if (i%300 == 0) { // every 300 iterations allow gui to process events
                 if (cancelLoad) {
                     showLoadProcess(false);
                     returnCode = CANCEL;
                     setUpdatesEnabled(true);
-
                     return false;
                 }
                 qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,3);
@@ -425,16 +433,16 @@ bool WorkSheet::loadFileName(QString &fileName,
                 senderMap.insert(sid,1);
             }
             //messageList->append(qmessage);
-            messageList->append(&messageArray[i]);
+            //qDebug() << "APPEND MESSAGE:" << goodRows;
+            messageList->append(&messageArray[goodRows]);
+            goodRows++;
         }
         catch (f8Exception&  e){
             errorStr =  "Error - Invalid data in file: " + fileName + ", on  row: " + QString::number(i);
-            qWarning() << "exception, row " << i;
             qWarning() << "Error - " << e.what();
             msgList.append(GUI::ConsoleMessage(errorStr,GUI::ConsoleMessage::ErrorMsg));
         }
-        i++;
-
+    i++;
     }
     QList<qint32> valueList = senderMap.values();
     qSort(valueList.begin(), valueList.end(),qGreater<int>());

@@ -46,6 +46,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <QApplication>
 #include <QDebug>
 #include <QtWidgets>
+#include <QThreadPool>
 #include "worksheetmodel.h"
 #include <fix8/f8includes.hpp>
 #include "fix8/field.hpp"
@@ -85,6 +86,8 @@ bool Fix8Log::init()
     bool haveError = false;
     readSettings();
     initDatabase();
+
+   //QThreadPool::globalInstance()->setMaxThreadCount(20);
 
     // QListIterator <QPair<QString ,FieldUse *>> pairListIter(fix8shareLib->fieldUsePairList);
 

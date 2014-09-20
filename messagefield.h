@@ -138,6 +138,7 @@ class QMessage
     QMessage(Message *m,QLatin1String senderID,std::function<const F8MetaCntx&()> ctxFunc);
     QMessage(Message *m,QLatin1String senderID, int seqID,std::function<const F8MetaCntx&()> ctxFunc);
     QMessage(const QMessage &);
+    void set(Message *m,QLatin1String senderID,int seq,std::function<const F8MetaCntx&()> ctxFunc);
     Message *mesg;
     QString senderID;
     QMultiMap <QString, QVariant > map;

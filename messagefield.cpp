@@ -381,6 +381,106 @@ QMessage::QMessage(const QMessage &qm)
     map = qm.map;
     ctxFunc = qm.ctxFunc;
 }
+
+void QMessage::set(Message *m,QLatin1String sid,int seq,std::function<const F8MetaCntx&()> cFunc)
+{
+    mesg= m;
+    senderID = sid;
+    seqID = seq;
+    ctxFunc = cFunc;
+    MessageBase *header;
+    MessageBase *trailer;
+    GroupBase  *groupBase;
+    char c[60];
+    BaseField *bf;
+    FieldTrait::FieldType ft;
+    QVariant var;
+    QString str;
+    QString name;
+    if (!mesg)
+        return;
+    header = mesg->Header();
+    trailer = mesg->Trailer();
+    for (Fields::const_iterator itr(header->fields_begin()); itr != header->fields_end(); ++itr)
+    {
+        //const FieldTrait::FieldType trait(pre.find(itr->first)->_ftype);
+        name = QString::fromStdString(ctxFunc().find_be(itr->first)->_name);
+        bf = itr->second;
+        ft =  bf->get_underlying_type();
+        if (FieldTrait::is_int(ft)) {
+            int ival(static_cast<Field<int, 0>*>(bf)->get());
+            var = ival;
+            //qDebug() << "1 MAP INSERT name= " << name << "value = " << var << __FILE__ << __LINE__;
+            map.insert(name,var);
+        }
+        else if (FieldTrait::is_float(ft)) {
+            double fval(static_cast<Field<double, 0>*>(bf)->get());
+            var = fval;
+            //qDebug() << "2 MAP INSERT name= " << name << "value = " << var << __FILE__ << __LINE__;
+            map.insert(name,var);
+        }
+        else {
+            memset(c,'\0',60);
+            bf->print(c);
+            str =  QString::fromLatin1(c);
+            //qDebug() << "3 MAP INSERT name= " << name << "value = " << str << __FILE__ << __LINE__;
+            map.insert(name,str);
+        }
+    }
+    for (Fields::const_iterator itr(mesg->fields_begin()); itr != mesg->fields_end(); ++itr)
+    {
+        if (mesg->get_fp().is_group(itr->first)) {
+            name = QString::fromStdString(ctxFunc().find_be(itr->first)->_name);
+            GroupBase *gb (mesg->find_group(itr->first));
+            if (gb)
+                generateItems(gb);
+        }
+        else {
+            name = QString::fromStdString(ctxFunc().find_be(itr->first)->_name);
+            bf = itr->second;
+            ft =  bf->get_underlying_type();
+            if (FieldTrait::is_int(ft)) {
+                int ival(static_cast<Field<int, 0>*>(bf)->get());
+                var = ival;
+                map.insert(name,var);
+            }
+            if (FieldTrait::is_float(ft)) {
+                double fval(static_cast<Field<double, 0>*>(bf)->get());
+                var = fval;
+                map.insert(name,var);
+            }
+            else {
+                memset(c,'\0',60);
+                bf->print(c);
+                str =  QString::fromLatin1(c);
+                map.insert(name,str);
+            }
+        }
+    }
+    for (Fields::const_iterator itr(trailer->fields_begin()); itr != trailer->fields_end(); ++itr)
+    {
+
+        name = QString::fromStdString(ctxFunc().find_be(itr->first)->_name);
+        bf = itr->second;
+        ft =  bf->get_underlying_type();
+        if (FieldTrait::is_int(ft)) {
+            int ival(static_cast<Field<int, 0>*>(bf)->get());
+            var = ival;
+            map.insert(name,var);
+        }
+        if (FieldTrait::is_float(ft)) {
+            double fval(static_cast<Field<double, 0>*>(bf)->get());
+            var = fval;
+            map.insert(name,var);
+        }
+        else {
+            memset(c,'\0',60);
+            bf->print(c);
+            str =  QString::fromLatin1(c);
+            map.insert(name,str);
+        }
+    }
+}
 void QMessage::generateItems(GroupBase *gb)
 {
     char c[60];

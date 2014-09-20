@@ -201,7 +201,8 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
         }
         qmessage = mIter.next();
         QString senderID = qmessage->senderID;
-
+        //qDebug() << ">>>>>>>>>>>>> MESSAGE LIST COUNT = " << messageList->count() << __FILE__ << __LINE__;
+      // qDebug() << "Look for sender id = " << senderID << __FILE__ << __LINE__;
         if (messageList->senderColorMap.contains(qmessage->senderID) ) {
             modBGColor =messageList->senderColorMap.value(qmessage->senderID);
             modifyBackgroundColor = true;

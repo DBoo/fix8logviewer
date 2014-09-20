@@ -41,6 +41,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <QCommandLineOption>
 
 #include <QDataStream>
+#include <QThreadPool>
 #include "fix8log.h"
 #include "globals.h"
 using namespace GUI;
@@ -49,7 +50,6 @@ int main(int argc, char *argv[])
     QtSingleApplication instance(argc, argv);
         if (instance.sendMessage("Wake up!"))
             return 0;
-
     //bool loadFile = false;
     QString loadFileName;
     QCoreApplication::setApplicationName("fix8log");
@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
     }
     qRegisterMetaType<fix8logdata>("fix8logdata");
     qRegisterMetaTypeStreamOperators<fix8logdata>("fix8logdata");
+
     Fix8Log *f8l = new Fix8Log(&instance);
     QObject::connect(&instance,SIGNAL(messageReceived(const QString&)),
                      f8l,SLOT(wakeupSlot(const QString&)));

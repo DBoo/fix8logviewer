@@ -101,7 +101,8 @@ void MainWindow::filterReturnSlot()
     else {
         haveFilterFunction = true;
     }
-   runFilterScript();
+    if (filterMode != WorkSheetData::Off)
+        runFilterScript();
 }
 void MainWindow::setFilterFunctions(SearchFunctionList *sfl)
 {
@@ -304,8 +305,7 @@ bool MainWindow::runFilterScript()
     int row=0;
     int numOfFilterArguments = filterArgList.count();
     QStringListIterator iter(filterArgList);
-    //qDebug() << "\tNum of filter args  = " << filterArgList.count();
-    //qDebug() << "\tFilter List:" << filterArgList;
+
     filterProgressBar->show();
 
     for(int i=0;i<wsm->rowCount();i++) {
