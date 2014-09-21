@@ -193,8 +193,12 @@ WorkSheet::~WorkSheet()
         _model->clear();
         delete _model;
     }
+    if (messageArray)
+        delete []messageArray;
+   // if (messageList)
+   //     qDeleteAll(*messageList);
     if (messageList)
-        qDeleteAll(*messageList);
+        delete messageList;
     if (senderMenu) {
         delete senderMenu;
         senderMenu = 0;
@@ -295,9 +299,25 @@ void WorkSheet::build()
 
     stackLayout = new QStackedLayout(this);
     setLayout(stackLayout);
-    progressView = new QQuickView(QUrl("qrc:qml/loadProgress.qml"));
+    progressView = new QQuickView(); //QUrl("qrc:qml/loadProgress.qml"));
     progressView->setResizeMode(QQuickView::SizeRootObjectToView);
     progressWidget = QWidget::createWindowContainer(progressView,this);
+
+
+    progressView->setSurfaceType(QSurface::OpenGLSurface);
+    QSurfaceFormat format;
+    format.setAlphaBufferSize(8);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+
+    progressView->setFormat(format);
+    progressView->setColor(QColor(Qt::transparent));
+    progressView->setClearBeforeRendering(true);
+
+
+    progressView->setFlags(Qt::FramelessWindowHint);
+
+    progressView->setSource(QUrl("qrc:qml/loadProgress.qml"));
+
     qmlObject = progressView->rootObject();
     if (!qmlObject) {
         qWarning() << "qml root object not found" << __FILE__ << __LINE__ ;
@@ -356,7 +376,8 @@ bool WorkSheet::loadFileName(QString &fileName,
     QFile dataFile(fileName);
     cancelReason = OK; // clear cancel reason
     qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,5);
-    setUpdatesEnabled(false);
+    //setUpdatesEnabled(false);
+   // showLoadProcess(true);
 
     bstatus =  dataFile.open(QIODevice::ReadOnly);
     if (!bstatus) {
@@ -364,6 +385,8 @@ bool WorkSheet::loadFileName(QString &fileName,
         msgList.append(message);
         _model->clear();
         returnCode = OPEN_FAILED;
+        showLoadProcess(false);
+
         return false;
     }
     QByteArray ba;
@@ -372,7 +395,7 @@ bool WorkSheet::loadFileName(QString &fileName,
         ba = dataFile.readLine();
         linecount++;
     }
-    //showLoadProcess(true,linecount);
+    showLoadProcess(true,linecount);
     dataFile.seek(0);
     int i=0;
     QElapsedTimer myTimer;
@@ -385,6 +408,8 @@ bool WorkSheet::loadFileName(QString &fileName,
     messageList = new QMessageList();
     QMessage *messageArray = new QMessage[linecount];
 
+
+
     char c[60];
     int goodRows = 0;
     while(!dataFile.atEnd()) {
@@ -393,6 +418,8 @@ bool WorkSheet::loadFileName(QString &fileName,
             if (cancelReason == TERMINATED)  // set from terminate
                 returnCode = TERMINATED;
             //setUpdatesEnabled(true);
+            showLoadProcess(false);
+
             return false;
         }
         try {
@@ -406,15 +433,14 @@ bool WorkSheet::loadFileName(QString &fileName,
             memset(c,'\0',60);
             senderID.print(c);
             QLatin1String sid(c);
-            //QMessage *qmessage = new QMessage(msg,sid,snum(),sharedLib->ctxFunc);
-            //QMessage *m = &(messageIter.next());
+            //QMessage *qmessage = new QMessage(); //msg,sid,snum(),sharedLib->ctxFunc);
 
-            //messageArray[i].mesg = msg;
-            //messageArray[i].senderID = sid;
-            //messageArray[i].ctxFunc = sharedLib->ctxFunc;
             // multhreading here
-            QtConcurrent::run(threadLoadMessage,&messageArray[i], msg,sid,snum(),sharedLib->ctxFunc);
-
+            QFuture <void> future = QtConcurrent::run(threadLoadMessage,&messageArray[goodRows], msg,sid,snum(),sharedLib->ctxFunc);
+            if (i > (linecount -5)) {
+                qDebug() << "WAit for future to finish ...." << i << __FILE__ << __LINE__;
+                future.waitForFinished();
+            }
             if (i%300 == 0) { // every 300 iterations allow gui to process events
                 if (cancelLoad) {
                     showLoadProcess(false);
@@ -435,6 +461,7 @@ bool WorkSheet::loadFileName(QString &fileName,
             //messageList->append(qmessage);
             //qDebug() << "APPEND MESSAGE:" << goodRows;
             messageList->append(&messageArray[goodRows]);
+            // messageList->append(&qmessage);
             goodRows++;
         }
         catch (f8Exception&  e){
@@ -489,9 +516,10 @@ bool WorkSheet::loadFileName(QString &fileName,
     senderMenu->addAction(showAllSendersA);
 
     _model->setWorkSheet(this);
-    if (!tableSchema)
+    if (!tableSchema) {
+        showLoadProcess(false);
         return false;
-
+    }
     QStringListIterator colNameIter(tableSchema->fieldNames);
     i=0;
     QString colName;
@@ -526,6 +554,7 @@ bool WorkSheet::loadFileName(QString &fileName,
  //   showLoadProcess(false);
     returnCode = OK;
    qDebug() << "Elapsed time of load = " << myTimer.elapsed() << __FILE__ << __LINE__;
+   showLoadProcess(false);
 
     return true;
 }

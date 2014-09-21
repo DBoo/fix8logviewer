@@ -41,6 +41,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <QMainWindow>
 #include <QPalette>
 #include <QToolBar>
+#include <QThreadPool>
 #include <QVector>
 using namespace GUI;
 float   Globals::version = 0.7;
@@ -58,6 +59,7 @@ QString Globals::timeFormats[] {
 Globals::TimeFormat Globals::timeFormat = Globals::HHMM;
 //QVector <Globals::MessagePair> * Globals::messagePairs=0;
 qint32 Globals::fontPtSize = 16;
+qint32 Globals::maxThreads = 2;
 Globals* Globals::Instance()
 {
     if (!m_pInstance)   {// Only allow one instance of class to be generated.
@@ -73,6 +75,7 @@ Globals* Globals::Instance()
      delete toolbar;
      QMainWindow *mw = new QMainWindow();
      fontPtSize = mw->font().pointSize();
+     //maxThreads = QThreadPool::maxThreadCount();
      delete mw;
     }
     return m_pInstance;

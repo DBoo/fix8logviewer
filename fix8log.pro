@@ -78,7 +78,9 @@ SOURCES += main.cpp\
     workSheetFilters.cpp \
     logicFilter.cpp \
     mainWindowExport.cpp \
-    threadloader.cpp
+    threadloader.cpp \
+    workSheetLoadFileConcurrently.cpp \
+    loaddatathread.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -129,7 +131,8 @@ HEADERS  += mainwindow.h \
     newwindowfilepage.h \
     welcomepage.h \
     logicFilter.h \
-    threadloader.h
+    threadloader.h \
+    loaddatathread.h
 
 RESOURCES += \
     resources.qrc

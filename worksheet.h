@@ -98,6 +98,7 @@ public:
     QUuid getID();
     quint32 doSearch(SearchType);
     QMessageList *getMessageList();
+    QMessage *messageArray;
     //enum {MsgSeqNum,SenderCompID,TargetCompID,SendingTime,BeginStr,BodyLength,CheckSum,EncryptMethod,HeartBtInt,MessageType,NumColumns};
    // static QString headerLabel[NumColumns];
     QString getFileName();
@@ -107,6 +108,9 @@ public:
     bool loadFileName(QString &fileName,
                       QList <GUI::ConsoleMessage> &returnMessageList,
                       TableSchema *ts,quint32 &returnCode);
+    bool loadFileConcurrently(QString &fileName,
+                                 QList <GUI::ConsoleMessage> &msgList,
+                                 TableSchema *ts, quint32 &returnCode);
     void hideColumn(int colNum, bool hideCol);
     void setAlias(QString &);
     void showLoadProcess(bool isBeingLoaded, int numRecords=0);
