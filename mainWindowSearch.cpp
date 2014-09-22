@@ -45,6 +45,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "searchfunction.h"
 #include "searchlineedit.h"
 #include "tableschema.h"
+#include <QDebug>
 #include <QtConcurrent>
 #include <QQuickView>
 #include <QtWidgets>
@@ -237,7 +238,7 @@ void MainWindow::searchReturnSlot()
     if (searchFunction.function.length() <  3) {
         ws->doSearch(WorkSheet::SearchOff);
         haveSearchFunction = false;
-        ws->setSearchIndexes(filterLogicalIndexes);
+        ws->setSearchIndexes(filterLogicalIndexes,0);
         validateSearchButtons();
         return;
     }
@@ -261,7 +262,7 @@ void MainWindow::searchReturnSlot()
     }
 
 }
-void runSearchScriptThread(WorkSheet *ws,WorkSheetModel *wsm,QScriptValue &searchFunctionVal, QStringList &searchArgList,
+QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *wsm,QScriptValue &searchFunctionVal, QStringList &searchArgList,
                            QVector <qint32> *filterLogicalIndexes)
 {
     bool  skip = false;
@@ -274,6 +275,10 @@ void runSearchScriptThread(WorkSheet *ws,WorkSheetModel *wsm,QScriptValue &searc
     int row=0;
     int numOfSearchArguments = searchArgList.count();
     QStringListIterator iter(searchArgList);
+
+     QList <QStandardItem *> *items = new QList <QStandardItem *>();
+
+
     for(int i=0;i<wsm->rowCount();i++) {
         skip = false;
         args.clear();
@@ -366,7 +371,9 @@ void runSearchScriptThread(WorkSheet *ws,WorkSheetModel *wsm,QScriptValue &searc
                 answer = searchFunctionVal.call(QScriptValue(), args);
                 if (answer.toBool()) {
                     qDebug() << "FOUND ROW: " << row << __FILE__ << __LINE__;
+                    qDebug() << "ITEM ROW " << item->row();
                     filterLogicalIndexes->append(row);
+                    items->append(item);
                     break;
                 }
             }
@@ -378,6 +385,7 @@ void runSearchScriptThread(WorkSheet *ws,WorkSheetModel *wsm,QScriptValue &searc
         }
         row++;
     }
+    return items;
 }
 
 
@@ -408,7 +416,7 @@ bool MainWindow::runSearchScript()
     }
     if (searchArgList.count() < 1) {
         qWarning() << "No search arguments provided " << __FILE__ << __LINE__;
-        ws->setSearchIndexes(filterLogicalIndexes); // no indexes
+        ws->setSearchIndexes(filterLogicalIndexes,0); // no indexes
         validateSearchButtons();
         return false;
     }
@@ -423,8 +431,14 @@ bool MainWindow::runSearchScript()
     int row=0;
     int numOfSearchArguments = searchArgList.count();
     QStringListIterator iter(searchArgList);
-    QFuture<void> future = QtConcurrent::run(runSearchScriptThread,ws,wsm,searchFunctionVal,searchArgList,&filterLogicalIndexes);
+    QList <QStandardItem * > *items;//  = new QList<QStandardItem *>();
+
+
+    QFuture<QList <QStandardItem *> *> future = QtConcurrent::run(runSearchScriptThread,ws,wsm,searchFunctionVal,
+                                             searchArgList,&filterLogicalIndexes);
     future.waitForFinished();
+    items = future.result();
+    qDebug() << "NUM OF ITEMS GIVEN BACK = " << items->count() << __FILE__ << __LINE__;
     /*
     for(int i=0;i<wsm->rowCount();i++) {
         skip = false;
@@ -530,8 +544,9 @@ bool MainWindow::runSearchScript()
         row++;
     }
 */
-    qDebug() << "NUM OF FILTER INDEXES FOUND = " << filterLogicalIndexes.count() << __FILE__ << __LINE__;
-    ws->setSearchIndexes(filterLogicalIndexes);
+
+   // qDebug() << "NUM OF FILTER INDEXES FOUND = " << filterLogicalIndexes.count() << __FILE__ << __LINE__;
+    ws->setSearchIndexes(filterLogicalIndexes,items);
     validateSearchButtons();
     update();
     return true;

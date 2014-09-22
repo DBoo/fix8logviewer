@@ -39,6 +39,9 @@ protected:
     void run();
 private:
     bool cancelMe;
+    qint64 startPos;
+    qint64 endPos;
+    QMessage **qmessageArray;
 };
 
 #endif // LOADDATATHREAD_H

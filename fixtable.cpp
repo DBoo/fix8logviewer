@@ -329,7 +329,7 @@ void FixTable::paintEvent(QPaintEvent *pe)
 {
     QTableView::paintEvent(pe);
     if (!model()) {
-        qWarning() << "no model" << __FILE__;
+        //qWarning() << "no model" << __FILE__;
         return;
     }
     QPainter painter(viewport());

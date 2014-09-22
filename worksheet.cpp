@@ -304,15 +304,6 @@ void WorkSheet::build()
     progressWidget = QWidget::createWindowContainer(progressView,this);
 
 
-    progressView->setSurfaceType(QSurface::OpenGLSurface);
-    QSurfaceFormat format;
-    format.setAlphaBufferSize(8);
-    format.setRenderableType(QSurfaceFormat::OpenGL);
-
-    progressView->setFormat(format);
-    progressView->setColor(QColor(Qt::transparent));
-    progressView->setClearBeforeRendering(true);
-
 
     progressView->setFlags(Qt::FramelessWindowHint);
 
@@ -438,7 +429,7 @@ bool WorkSheet::loadFileName(QString &fileName,
             // multhreading here
             QFuture <void> future = QtConcurrent::run(threadLoadMessage,&messageArray[goodRows], msg,sid,snum(),sharedLib->ctxFunc);
             if (i > (linecount -5)) {
-                qDebug() << "WAit for future to finish ...." << i << __FILE__ << __LINE__;
+                //qDebug() << "WAit for future to finish ...." << i << __FILE__ << __LINE__;
                 future.waitForFinished();
             }
             if (i%300 == 0) { // every 300 iterations allow gui to process events

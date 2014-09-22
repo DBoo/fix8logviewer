@@ -90,7 +90,7 @@ public:
     void setTableSchema(TableSchema *);
     void setFilterIndexes(const QVector<qint32> &indexes,WorkSheetData::FilterMode);
     void setFilterIndexes(const QVector<qint32> &indexes);
-    void setSearchIndexes(const QVector <qint32> &indexes);
+    void setSearchIndexes(const QVector <qint32> &indexes,QList <QStandardItem *> *items);
     void setWorkSheetData(const WorkSheetData &wsd);
     void validateSelection();
 

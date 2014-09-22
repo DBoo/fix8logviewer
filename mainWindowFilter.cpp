@@ -293,7 +293,7 @@ bool MainWindow::runFilterScript()
     }
     if (filterArgList.count() < 1) {
         qWarning() << "No filter arguments provided " << __FILE__ << __LINE__;
-        ws->setSearchIndexes(filterLogicalIndexes); // no indexes
+        ws->setSearchIndexes(filterLogicalIndexes,0); // no indexes
         return false;
     }
     WorkSheetModel *wsm = ws->getModel();

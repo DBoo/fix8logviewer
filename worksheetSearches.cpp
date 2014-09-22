@@ -58,12 +58,12 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <fix8/message.hpp>
 using namespace FIX8;
 
-void WorkSheet::setSearchIndexes(const QVector<qint32> &indexes)
+void WorkSheet::setSearchIndexes(const QVector<qint32> &indexes,QList <QStandardItem *> *items)
 {
     //qDebug() << "Work Sheet, set vertical headers to " << indexes << __FILE__ << __LINE__;
     searchLogicalIndexes = indexes;
     FixTableVerticaHeaderView *fvh = fixTable->getFixVerticalHeader();
-    fvh->setHighlightList(searchLogicalIndexes);
+    fvh->setHighlightList(searchLogicalIndexes,items);
     fvh->repaint();
     fvh->update();
     fixTable->viewport()->repaint();
