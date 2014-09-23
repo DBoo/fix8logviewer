@@ -82,11 +82,10 @@ bool Fix8Log::init()
     MessageField *messageField;
     QStringList errorStrList;
     MainWindow *newMW;
-    QMap <QString, QStandardItemModel *>::iterator currentItemIter;
+    //QMap <QString, QStandardItemModel *>::iterator currentItemIter;
     bool haveError = false;
     readSettings();
     initDatabase();
-
    //QThreadPool::globalInstance()->setMaxThreadCount(20);
 
     // QListIterator <QPair<QString ,FieldUse *>> pairListIter(fix8shareLib->fieldUsePairList);
@@ -143,7 +142,7 @@ bool Fix8Log::init()
                     QListIterator <WorkSheetData> iter2(wsdList);
                     while(iter2.hasNext()) {
                         WorkSheetData wsd = iter2.next();
-                        currentItemIter =  fileNameModelMap.find(wsd.fileName);
+                        //currentItemIter =  fileNameModelMap.find(wsd.fileName);
                         newMW->addWorkSheet(wsd); // do not create model, have code reuse and redo  busy screen for each tab
                         newMW->setCurrentTabAndSelectedRow(wd.currentTab,2);
                     }

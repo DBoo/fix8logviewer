@@ -65,8 +65,7 @@ void WorkSheetModel::setWorkSheet(WorkSheet *ws)
 WorkSheetModel * WorkSheetModel::clone(const bool &cancelLoad)
 {
     WorkSheetModel *wsm = new WorkSheetModel();
-    if (tableSchema)
-        wsm->setTableSchema(*tableSchema);
+
     if (messageList) {
         QMessageList *newMessageList = messageList->clone(cancelLoad);
         if (cancelLoad) {
@@ -74,7 +73,8 @@ WorkSheetModel * WorkSheetModel::clone(const bool &cancelLoad)
             wsm = 0;
             return wsm;
         }
-
+        if (tableSchema)
+            wsm->setTableSchema(*tableSchema);
         wsm->setMessageList(newMessageList,cancelLoad);
     }
     if(cancelLoad) {  // gui set this to cancel
@@ -202,7 +202,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
         qmessage = mIter.next();
         QString senderID = qmessage->senderID;
         //qDebug() << ">>>>>>>>>>>>> MESSAGE LIST COUNT = " << messageList->count() << __FILE__ << __LINE__;
-      // qDebug() << "Look for sender id = " << senderID << __FILE__ << __LINE__;
+        // qDebug() << "Look for sender id = " << senderID << __FILE__ << __LINE__;
         if (messageList->senderColorMap.contains(qmessage->senderID) ) {
             modBGColor =messageList->senderColorMap.value(qmessage->senderID);
             modifyBackgroundColor = true;
@@ -222,189 +222,194 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
             found = false;
             tableHeader = tableHeaderIter.next();
             fieldID = tableHeader->ft->_fnum;
-            BaseField *bf = header->get_field(fieldID);
-            if (bf) {
-                ft =  bf->get_underlying_type();
-                memset(c,'\0',60);
-                bf->print(c);
-                if (FieldTrait::is_int(ft)) {
-                    int ival(static_cast<Field<int, 0>*>(bf)->get());
-                    //qDebug() << tableHeader->name << ", field id = " << fieldID << ", value = " << ival;
-                    IntItem *intItem = new IntItem(ival);
-                    //QStandardItem *intItem = new QStandardItem(QString::number(ival));
-
-                    //intItem->setData(ival,Qt::UserRole);
-                    intItem->setData(senderID,senderIDRole);
-                    intItem->setData(var);
-                    intItem->setData(ival,sortRole);
-                    if (modifyBackgroundColor)
-                       intItem->setData(modBGColor, Qt::BackgroundRole);
-                    //setItem(rowPos,colPos,intItem);
-                    items.append(intItem);
-                    found = true;
-                }
-
-                else if (FieldTrait::is_float(ft)) {
-                    qDebug() << "WORK WITH FLOAT" << __FILE__ << __LINE__;
-                    double fval(static_cast<Field<double, 0>*>(bf)->get());
-                    found = true;
-
-                }
-
-                else if (FieldTrait::is_string(ft)) {
+            if (header) {
+                BaseField *bf = header->get_field(fieldID);
+                if (bf) {
+                    ft =  bf->get_underlying_type();
                     memset(c,'\0',60);
                     bf->print(c);
-                    QLatin1Literal ll(c);
-                    QStandardItem *strItem = new QStandardItem(QString(ll));
-                    strItem->setData(senderID,senderIDRole);
-                    strItem->setData(var);
-                    strItem->setData(ll,sortRole);
-                    if (modifyBackgroundColor)
-                        strItem->setData(modBGColor, Qt::BackgroundRole);
-                    //setItem(rowPos,colPos,strItem);
-                    items.append(strItem);
+                    if (FieldTrait::is_int(ft)) {
+                        int ival(static_cast<Field<int, 0>*>(bf)->get());
+                        //qDebug() << tableHeader->name << ", field id = " << fieldID << ", value = " << ival;
+                        IntItem *intItem = new IntItem(ival);
+                        //QStandardItem *intItem = new QStandardItem(QString::number(ival));
 
-                    found = true;
+                        //intItem->setData(ival,Qt::UserRole);
+                        intItem->setData(senderID,senderIDRole);
+                        intItem->setData(var);
+                        intItem->setData(ival,sortRole);
+                        if (modifyBackgroundColor)
+                            intItem->setData(modBGColor, Qt::BackgroundRole);
+                        //setItem(rowPos,colPos,intItem);
+                        items.append(intItem);
+                        found = true;
+                    }
+
+                    else if (FieldTrait::is_float(ft)) {
+                        qDebug() << "WORK WITH FLOAT" << __FILE__ << __LINE__;
+                        double fval(static_cast<Field<double, 0>*>(bf)->get());
+                        found = true;
+
+                    }
+
+                    else if (FieldTrait::is_string(ft)) {
+                        memset(c,'\0',60);
+                        bf->print(c);
+                        QLatin1Literal ll(c);
+                        QStandardItem *strItem = new QStandardItem(QString(ll));
+                        strItem->setData(senderID,senderIDRole);
+                        strItem->setData(var);
+                        strItem->setData(ll,sortRole);
+                        if (modifyBackgroundColor)
+                            strItem->setData(modBGColor, Qt::BackgroundRole);
+                        //setItem(rowPos,colPos,strItem);
+                        items.append(strItem);
+
+                        found = true;
+
+                    }
+                    else if (FieldTrait::is_char(ft)) {
+                        QChar ch(static_cast<Field<char, 0>*>(bf)->get());
+                        QString cstr = ch.decomposition();
+                        QStandardItem *charItem = new QStandardItem(cstr);
+                        charItem->setData(senderID,senderIDRole);
+                        charItem->setData(var);
+                        charItem->setData(cstr,sortRole);
+                        if (modifyBackgroundColor)
+                            charItem->setData(modBGColor, Qt::BackgroundRole);
+                        //setItem(rowPos,colPos,charItem);
+                        items.append(charItem);
+
+                        found = true;
+
+                    }
 
                 }
-                else if (FieldTrait::is_char(ft)) {
-                    QChar ch(static_cast<Field<char, 0>*>(bf)->get());
-                    QString cstr = ch.decomposition();
-                    QStandardItem *charItem = new QStandardItem(cstr);
-                    charItem->setData(senderID,senderIDRole);
-                    charItem->setData(var);
-                    charItem->setData(cstr,sortRole);
-                    if (modifyBackgroundColor)
-                        charItem->setData(modBGColor, Qt::BackgroundRole);
-                    //setItem(rowPos,colPos,charItem);
-                    items.append(charItem);
-
-                    found = true;
-
-                }
-
             }
-            BaseField *bfm = message->get_field(fieldID);
-            if (bfm) {
-                ft =  bfm->get_underlying_type();
-                memset(c,'\0',60);
-                bfm->print(c);
-                if (FieldTrait::is_int(ft)) {
-                    int ival(static_cast<Field<int, 0>*>(bfm)->get());
-                    //qDebug() << tableHeader->name << ", field id = " << fieldID << ", value = " << ival;
-                    IntItem *intItem = new IntItem(ival);
-                    intItem->setData(senderID,senderIDRole);
-                    intItem->setData(var);
-                    intItem->setData(ival,sortRole);
-                    if (modifyBackgroundColor)
-                        intItem->setData(modBGColor, Qt::BackgroundRole);
-                    // setItem(rowPos,colPos,intItem);
-                    items.append(intItem);
-
-                    found = true;
-
-                }
-                else if (FieldTrait::is_float(ft)) {
-                    qDebug() << "WORK WITH FLOAT" << __FILE__ << __LINE__;
-                    double fval(static_cast<Field<double, 0>*>(bfm)->get());
-                    found = true;
-                }
-
-                else if (FieldTrait::is_string(ft)) {
+            if (message) {
+                BaseField *bfm = message->get_field(fieldID);
+                if (bfm) {
+                    ft =  bfm->get_underlying_type();
                     memset(c,'\0',60);
                     bfm->print(c);
-                    QStandardItem *strItem = new QStandardItem(QLatin1Literal(c));
-                    strItem->setData(senderID,senderIDRole);
-                    strItem->setData(QLatin1Literal(c),sortRole);
-                    strItem->setData(var);
-                    if (modifyBackgroundColor)
-                        strItem->setData(modBGColor, Qt::BackgroundRole);
-                    //setItem(rowPos,colPos,strItem);
-                    items.append(strItem);
+                    if (FieldTrait::is_int(ft)) {
+                        int ival(static_cast<Field<int, 0>*>(bfm)->get());
+                        //qDebug() << tableHeader->name << ", field id = " << fieldID << ", value = " << ival;
+                        IntItem *intItem = new IntItem(ival);
+                        intItem->setData(senderID,senderIDRole);
+                        intItem->setData(var);
+                        intItem->setData(ival,sortRole);
+                        if (modifyBackgroundColor)
+                            intItem->setData(modBGColor, Qt::BackgroundRole);
+                        // setItem(rowPos,colPos,intItem);
+                        items.append(intItem);
 
-                    found = true;
-                }
-                else if (FieldTrait::is_char(ft)) {
-                    QChar ch(static_cast<Field<char, 0>*>(bfm)->get());
-                    QString cstr = ch.decomposition();
-                    QStandardItem *charItem = new QStandardItem(cstr);
-                    charItem->setData(senderID,senderIDRole);
-                    charItem->setData(cstr,sortRole);
-                    charItem->setData(var);
-                    if (modifyBackgroundColor)
-                        charItem->setData(modBGColor, Qt::BackgroundRole);
-                    //setItem(rowPos,colPos,charItem);
-                    items.append(charItem);
+                        found = true;
 
-                    found = true;
-                }
-            }
-            //else
-            //   qWarning() << "BASE FIELD = NULL FOR HEADER" << __FILE__ << __LINE__;
-            Groups groups = message->get_groups();
-            std::map<unsigned short,GroupBase *>::iterator iterGrps;
-            for(iterGrps = groups.begin(); iterGrps != groups.end(); iterGrps++) {
-                groupBase = iterGrps->second;
-                int size = groupBase->size();
-                for(int i=0;i<size;i++) {
-                    MessageBase *mb = groupBase->get_element(i);
-                    mbName = QString::fromStdString(mb->get_msgtype());
-                    BaseField *bfg = mb->get_field(fieldID);
-                    if (bfg) {
-                        ft =  bfg->get_underlying_type();
+                    }
+                    else if (FieldTrait::is_float(ft)) {
+                        qDebug() << "WORK WITH FLOAT" << __FILE__ << __LINE__;
+                        double fval(static_cast<Field<double, 0>*>(bfm)->get());
+                        found = true;
+                    }
+
+                    else if (FieldTrait::is_string(ft)) {
                         memset(c,'\0',60);
-                        bfg->print(c);
-                        if (FieldTrait::is_int(ft)) {
-                            int ival(static_cast<Field<int, 0>*>(bfg)->get());
-                            //qDebug() << tableHeader->name << ", field id = " << fieldID << ", value = " << ival;
-                            IntItem *intItem = new IntItem(ival);
-                            intItem->setData(senderID,senderIDRole);
-                            intItem->setData(ival,sortRole);
-                            intItem->setData(var);
-                            if (modifyBackgroundColor)
-                                intItem->setData(modBGColor, Qt::BackgroundRole);
-                            //setItem(rowPos,colPos,intItem);
-                            items.append(intItem);
+                        bfm->print(c);
+                        QStandardItem *strItem = new QStandardItem(QLatin1Literal(c));
+                        strItem->setData(senderID,senderIDRole);
+                        strItem->setData(QLatin1Literal(c),sortRole);
+                        strItem->setData(var);
+                        if (modifyBackgroundColor)
+                            strItem->setData(modBGColor, Qt::BackgroundRole);
+                        //setItem(rowPos,colPos,strItem);
+                        items.append(strItem);
 
-                            found = true;
-                        }
-                        else if (FieldTrait::is_float(ft)) {
-                            qDebug() << "WORK WITH FLOAT" << __FILE__ << __LINE__;
-                            double fval(static_cast<Field<double, 0>*>(bfg)->get());
-                            found = true;
-                        }
-                        else if (FieldTrait::is_string(ft)) {
+                        found = true;
+                    }
+                    else if (FieldTrait::is_char(ft)) {
+                        QChar ch(static_cast<Field<char, 0>*>(bfm)->get());
+                        QString cstr = ch.decomposition();
+                        QStandardItem *charItem = new QStandardItem(cstr);
+                        charItem->setData(senderID,senderIDRole);
+                        charItem->setData(cstr,sortRole);
+                        charItem->setData(var);
+                        if (modifyBackgroundColor)
+                            charItem->setData(modBGColor, Qt::BackgroundRole);
+                        //setItem(rowPos,colPos,charItem);
+                        items.append(charItem);
+
+                        found = true;
+                    }
+                }
+
+                //else
+                //   qWarning() << "BASE FIELD = NULL FOR HEADER" << __FILE__ << __LINE__;
+                Groups groups = message->get_groups();
+                std::map<unsigned short,GroupBase *>::iterator iterGrps;
+                for(iterGrps = groups.begin(); iterGrps != groups.end(); iterGrps++) {
+                    groupBase = iterGrps->second;
+                    int size = groupBase->size();
+                    for(int i=0;i<size;i++) {
+                        MessageBase *mb = groupBase->get_element(i);
+                        mbName = QString::fromStdString(mb->get_msgtype());
+                        BaseField *bfg = mb->get_field(fieldID);
+                        if (bfg) {
+                            ft =  bfg->get_underlying_type();
                             memset(c,'\0',60);
                             bfg->print(c);
-                            QStandardItem *strItem = new QStandardItem(QLatin1Literal(c));
-                            strItem->setData(senderID,senderIDRole);
-                            strItem->setData(QLatin1Literal(c),sortRole);
-                            strItem->setData(var);
-                            if (modifyBackgroundColor)
-                                strItem->setData(modBGColor, Qt::BackgroundRole);
-                            //setItem(rowPos,colPos,strItem);
-                            items.append(strItem);
+                            if (FieldTrait::is_int(ft)) {
+                                int ival(static_cast<Field<int, 0>*>(bfg)->get());
+                                //qDebug() << tableHeader->name << ", field id = " << fieldID << ", value = " << ival;
+                                IntItem *intItem = new IntItem(ival);
+                                intItem->setData(senderID,senderIDRole);
+                                intItem->setData(ival,sortRole);
+                                intItem->setData(var);
+                                if (modifyBackgroundColor)
+                                    intItem->setData(modBGColor, Qt::BackgroundRole);
+                                //setItem(rowPos,colPos,intItem);
+                                items.append(intItem);
 
-                            found = true;
-                        }
-                        else if (FieldTrait::is_char(ft)) {
-                            QChar ch(static_cast<Field<char, 0>*>(bfm)->get());
-                            QString cstr = ch.decomposition();
-                            QStandardItem *charItem = new QStandardItem(cstr);
-                            charItem->setData(senderID,senderIDRole);
-                            charItem->setData(cstr,sortRole);
-                            charItem->setData(var);
-                            if (modifyBackgroundColor)
-                                charItem->setData(modBGColor, Qt::BackgroundRole);
-                           // setItem(rowPos,colPos,charItem);
-                            items.append(charItem);
+                                found = true;
+                            }
+                            else if (FieldTrait::is_float(ft)) {
+                                qDebug() << "WORK WITH FLOAT" << __FILE__ << __LINE__;
+                                double fval(static_cast<Field<double, 0>*>(bfg)->get());
+                                found = true;
+                            }
+                            else if (FieldTrait::is_string(ft)) {
+                                memset(c,'\0',60);
+                                bfg->print(c);
+                                QStandardItem *strItem = new QStandardItem(QLatin1Literal(c));
+                                strItem->setData(senderID,senderIDRole);
+                                strItem->setData(QLatin1Literal(c),sortRole);
+                                strItem->setData(var);
+                                if (modifyBackgroundColor)
+                                    strItem->setData(modBGColor, Qt::BackgroundRole);
+                                //setItem(rowPos,colPos,strItem);
+                                items.append(strItem);
 
-                            found = true;
+                                found = true;
+                            }
+                            else if (FieldTrait::is_char(ft)) {
+                                QChar ch(static_cast<Field<char, 0>*>(bfm)->get());
+                                QString cstr = ch.decomposition();
+                                QStandardItem *charItem = new QStandardItem(cstr);
+                                charItem->setData(senderID,senderIDRole);
+                                charItem->setData(cstr,sortRole);
+                                charItem->setData(var);
+                                if (modifyBackgroundColor)
+                                    charItem->setData(modBGColor, Qt::BackgroundRole);
+                                // setItem(rowPos,colPos,charItem);
+                                items.append(charItem);
+
+                                found = true;
+                            }
                         }
+                        //  else
+                        //     qWarning() << "BASE FIELD = NULL FOR GROUP" << __FILE__ << __LINE__;
+                        // qDebug() << "\t\tHave Message Named: " + mbName;
                     }
-                    //  else
-                    //     qWarning() << "BASE FIELD = NULL FOR GROUP" << __FILE__ << __LINE__;
-                    // qDebug() << "\t\tHave Message Named: " + mbName;
                 }
             }
             if (trailer) {
@@ -454,7 +459,7 @@ void WorkSheetModel::generateData(const bool &cancelLoad)
                         charItem->setData(cstr,sortRole);
                         if (modifyBackgroundColor)
                             charItem->setData(modBGColor, Qt::BackgroundRole);
-                       // setItem(rowPos,colPos,charItem);
+                        // setItem(rowPos,colPos,charItem);
                         items.append(charItem);
 
                         found = true;

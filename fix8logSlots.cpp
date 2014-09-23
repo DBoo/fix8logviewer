@@ -45,8 +45,10 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "searchDialog.h"
 #include "windowdata.h"
 #include <QApplication>
+#include <QtConcurrent>
 #include <QDebug>
 #include <QDialog>
+#include <QThreadPool>
 #include <QtWidgets>
 #include <QQuickView>
 #include <QQuickWidget>
@@ -109,7 +111,12 @@ void Fix8Log::exitAppSlot()
     //writeSettings();
     qApp->closeAllWindows();
     qDebug() << "CALL QUIT" << __FILE__ << __LINE__;
-    qApp->quit();
+    bool bstatus = QThreadPool::globalInstance()->waitForDone(1000);
+    qDebug() << "Status of wait for done = " << bstatus << __FILE__ << __LINE__;
+    if (bstatus)
+        qApp->quit();
+    else
+        qApp->exit(0);
 }
 void Fix8Log::toolButtonStyleModfiedSlot(Qt::ToolButtonStyle tbs)
 {

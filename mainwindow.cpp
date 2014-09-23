@@ -80,6 +80,9 @@ MainWindow::MainWindow(MainWindow &mw,Database *db,bool copyAll)
     sharedLib = mw.getSharedLibrary();
     fieldUsePairList = mw.getFieldUsePair();
     restoreState(mw.saveState());
+    move(x+100,y+90); // offset from window copied
+
+    show();
     if (copyAll) {
         for (int i=0;i<mw.tabW->count();i++) {
             WorkSheet *oldWorkSheet = qobject_cast <WorkSheet *> (mw.tabW->widget(i));
@@ -117,8 +120,8 @@ MainWindow::MainWindow(MainWindow &mw,Database *db,bool copyAll)
     }
     readSettings();
     setFont(mw.font());
+    qDebug() << "MOVE  NEW WINDOW " << __FILE__ << __LINE__;
 
-    move(x+100,y+90); // offset from window copied
     linkSearchOn = mw.linkSearchOn;
     //linkSearchA->setChecked(linkSearchOn);
     searchFunction = mw.searchFunction;
@@ -130,6 +133,8 @@ MainWindow::MainWindow(MainWindow &mw,Database *db,bool copyAll)
         schemaMenu->setStyleSheet(menuStyle);
         helpMenu->setStyleSheet(menuStyle);
     }
+    qDebug() << "DONE WITH NEW WINDOW " << __FILE__ << __LINE__;
+
 }
 void MainWindow::setLoading(bool bstatus)
 {
@@ -354,12 +359,12 @@ void MainWindow::buildMainWindow()
 
     newTabA = new QAction(tr("New Tab"),this);
     newTabA->setIcon((QIcon(":/images/svg/newspreadsheet.svg")));
-    newTabA->setToolTip(tr("Create A New Empty Tab"));
-    newTabA->setWhatsThis(tr("Create a new tab in this window"));
+    newTabA->setToolTip(tr("Load a new log file in this window"));
+    newTabA->setWhatsThis(tr("Load a new log file in this window (must have same schema)"));
 
     copyTabA = new QAction(tr("Copy Tab"),this);
     copyTabA->setIcon((QIcon(":/images/svg/spreadsheetCopy.svg")));
-    copyTabA->setToolTip(tr("Create New Tab From Current Tab"));
+    copyTabA->setToolTip(tr("Copy this log file into new tab"));
     connect(copyTabA,SIGNAL(triggered()),this,SLOT(copyTabSlot()));
 
     cutTabA = new QAction(tr("Cut Tab"),this);
@@ -1012,6 +1017,8 @@ void MainWindow::setWindowData(const WindowData wd)
     }
 
 }
+
+
 QList <WorkSheetData> MainWindow::getWorksheetData(int windowID)
 {
     QList <WorkSheetData> wsdList;

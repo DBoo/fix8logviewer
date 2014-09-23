@@ -62,12 +62,41 @@ using namespace FIX8;
 using namespace std;
 void Fix8Log::copyWindowSlot(MainWindow *mw)
 {
-    MainWindow *newMW  =new MainWindow(*mw,database,true);
-    newMW->setFieldUsePair(&fieldUsePairList);
+    if (!mw) {
+        qWarning() << "Error no window found to copy" << __FILE__ << __LINE__;
+        return;
+    }
+    MainWindow *newMW =  new MainWindow(database);
+    WindowData wd = mw->getWindowData();
+    newMW->setWindowData(wd);
+    Fix8SharedLib *fixLib = mw->getSharedLibrary();
+    QList <WorkSheetData> wsdList = mw->getWorksheetData(0);
+    newMW->setSharedLibrary(fixLib);
+    //newMW->setTableSchema(wd.tableSchema);
+    newMW->setFieldUsePair(&(fixLib->fieldUsePairList));
     newMW->setSearchFunctions(searchFunctionList);
+    newMW->setFilterFunctions(filterFunctionList);
+
     wireSignalAndSlots(newMW);
-    newMW->show();
     mainWindows.append(newMW);
+    int xx = newMW->x();
+    int yy = newMW->y();
+    xx = xx + 150;
+    yy = yy + 100;
+    newMW->move(xx,yy);
+    newMW->show();
+
+    newMW->setAutoSaveOn(autoSaveOn);
+    // have to set style sheet after show to see it take effect
+    newMW->mainMenuBar->setStyleSheet(wd.menubarStyleSheet);
+    QListIterator <WorkSheetData> iter2(wsdList);
+    while(iter2.hasNext()) {
+        WorkSheetData wsd = iter2.next();
+        newMW->addWorkSheet(wsd); // do not create model, have code reuse and redo  busy screen for each tab
+        newMW->setCurrentTabAndSelectedRow(wd.currentTab,2);
+    }
+
+
 }
 void Fix8Log::createNewWindowSlot(MainWindow *mw)
 {
@@ -168,12 +197,14 @@ void Fix8Log::deleteMainWindowSlot(MainWindow *mw)
         searchDialog = 0;
     }
     mainWindows.removeOne(mw);
+    mw->hide();
     mw->deleteLater();
     if (mainWindows.count() < 1) {
        if (schemaEditorDialog)
             schemaEditorDialog->windowDeleted(mw);
         writeSettings();
-        qApp->exit();
+        qApp->closeAllWindows(); // close any dialog
+       // qApp->exit();
     }
 
 }

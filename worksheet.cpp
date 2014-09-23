@@ -94,17 +94,20 @@ bool WorkSheet::copyFrom(WorkSheet &oldws)
             showLoadProcess(false);
             return false;
         }
-        fixTable->setWorkSheetModel(_model);
     }
     fixFileName = oldws.getFileName();
     tableSchema = oldws.tableSchema;
+    fixTable->setUpdatesEnabled(false);
+    fixTable->setWorkSheetModel(_model);
+
     setTableSchema(tableSchema);
+    fixTable->setUpdatesEnabled(true);
     QString str = oldws.getFileName();
     QFileInfo fi(str);
     senderMenu = new QMenu(this);
     senderMenu->setTitle(fi.fileName());
     if (!oldws.senderActionGroup) {
-        fixTable->setWorkSheetModel(_model);
+        //fixTable->setWorkSheetModel(_model);
         showLoadProcess(false);
         return false;
     }

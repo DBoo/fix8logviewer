@@ -44,7 +44,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <QThreadPool>
 #include <QVector>
 using namespace GUI;
-float   Globals::version = 0.7;
+float   Globals::version = 0.71;
 int Globals::databaseVersion;
 QString Globals::versionStr;
 QSize Globals::smallIconSize;

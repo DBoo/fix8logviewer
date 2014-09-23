@@ -35,9 +35,21 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 //-------------------------------------------------------------------------------------------------
 
 #include "messagefield.h"
-
+#include <QtConcurrent>
 #include <QApplication>
+#include <QLatin1String>
+#include <QFuture>
 #include <QDebug>
+
+
+void threadLoadCloneMessage(QMessage *newMesg,QMessage *oldMessage)
+{
+    //Message *newM = oldMessage->mesg->clone();
+    QLatin1String ls(oldMessage->senderID.toLatin1());
+    newMesg->set(oldMessage->mesg,ls,oldMessage->seqID,oldMessage->ctxFunc);
+}
+
+
 FieldUse::FieldUse():isDefault(false)
 {
 
@@ -545,7 +557,7 @@ QMessageList * QMessageList::clone(const bool &cancel)
 {
     QMessage *message;
     QMessageList *qml = new QMessageList();
-    //qDebug() << "!!! MESSAGELIST CLONE: count = " << count() << __FILE__ << __LINE__;
+    qDebug() << "!!! MESSAGELIST CLONE: count = " << count() << __FILE__ << __LINE__;
     qml->senderColorMap = senderColorMap;
     qml->defaultSender = defaultSender;
     QListIterator <QMessage *> iter(*this);
@@ -569,7 +581,12 @@ QMessageList * QMessageList::clone(const bool &cancel)
 
         i++;
         message =  iter.next();
-        qml->append(new QMessage(*message));
+        QMessage *qm = new QMessage();
+        QFuture <void> future = QtConcurrent::run(threadLoadCloneMessage,qm,message);
+        if (!iter.hasNext())
+            future.waitForFinished();
+        qml->append(qm);
     }
     return qml;
 }
+
