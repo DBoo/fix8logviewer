@@ -70,18 +70,11 @@ void WorkSheet::setFilterIndexes(const QVector<qint32> &indexes)
 void WorkSheet::setFilterIndexes(const QVector<qint32> &indexes,WorkSheetData::FilterMode fm)
 {
   filterIndexes = indexes;
-  qDebug() << "!!!!!!!!!!!!!! HERE IN WorkSheet::SetFilterIndexes" << __FILE__ << __LINE__;
   filterMode = fm;
   QElapsedTimer ept;
   ept.start();
 
-  fixTable->setLogicFilterIndexes(indexes,fm);
-  int t1 = ept.elapsed();
-  qDebug() << "TIME TO SET LOGIC FILTERS = " << t1 << __FILE__ << __LINE__;
-  fixTable->redoSearch();
-  qDebug() << "TIME TO DO SEARCH = " << ( ept.elapsed()  - t1) << __FILE__ << __LINE__;
-
-
+  fixTable->setLogicFilterIndexes(indexes,fm,cancelLoad);
 }
 void WorkSheet::setFieldUsePair(const QList<QPair<QString ,FieldUse *>> *fup)
 {
@@ -91,7 +84,7 @@ void WorkSheet::setFieldUsePair(const QList<QPair<QString ,FieldUse *>> *fup)
 void WorkSheet::wipeFilter()
 {
     filterIndexes.clear();
-    fixTable->setLogicFilterIndexes(filterIndexes,filterMode);
+    fixTable->setLogicFilterIndexes(filterIndexes,filterMode,cancelLoad);
     fixTable->redoSearch();
 
 }

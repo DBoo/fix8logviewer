@@ -71,7 +71,8 @@ void threadLoadMessage(QMessage *qm,Message *m,QLatin1String senderID,int seq,st
 
 WorkSheet::WorkSheet(QWidget *parent ) : QWidget(parent),
     senderMenu(0),cancelLoad(false),tableSchema(0),messageList(0),
-  currentRow(-1),filterMode(WorkSheetData::Off),sharedLib(0),fieldUsePairList(0)
+  currentRow(-1),filterMode(WorkSheetData::Off),sharedLib(0),fieldUsePairList(0),cancelFilter(false),
+  messageArray(0)
 {
     build();
     _model = new WorkSheetModel(this);
@@ -133,7 +134,7 @@ WorkSheet::WorkSheet(WorkSheetModel *model,
                      const WorkSheetData &wsd,QWidget *parent):
     QWidget(parent),
     senderMenu(0),cancelLoad(false),origWSD(wsd),tableSchema(0),messageList(0),
-    currentRow(-1)
+    currentRow(-1),messageArea(0)
 
 {
 
@@ -344,10 +345,13 @@ QMessageList *WorkSheet::getMessageList()
 void WorkSheet::terminate()
 {
     // in case loadFile is going on
+    qDebug() << "TERMINATE WORK SHEET" << __FILE__ << __LINE__;
     showLoadProcess(false);
+    cancelFilter = true;
     cancelLoad = true;
     cancelReason = TERMINATED;
     senderMenu = 0;
+    fixTable->cancelFilter();
 }
 bool WorkSheet::loadFileName(QString &fileName,
                              QList <GUI::ConsoleMessage> &msgList,

@@ -278,7 +278,8 @@ QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *ws
 
      QList <QStandardItem *> *items = new QList <QStandardItem *>();
 
-
+    QElapsedTimer elapsedTimer;
+    elapsedTimer.start();
     for(int i=0;i<wsm->rowCount();i++) {
         skip = false;
         args.clear();
@@ -370,7 +371,6 @@ QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *ws
                 }
                 answer = searchFunctionVal.call(QScriptValue(), args);
                 if (answer.toBool()) {
-                    qDebug() << "FOUND ROW: " << row << __FILE__ << __LINE__;
                     qDebug() << "ITEM ROW " << item->row();
                     filterLogicalIndexes->append(row);
                     items->append(item);
@@ -385,6 +385,7 @@ QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *ws
         }
         row++;
     }
+    qDebug() << "TIME TO PERFORM FILTER = " << elapsedTimer.elapsed() << __FILE__ << __LINE__;
     return items;
 }
 

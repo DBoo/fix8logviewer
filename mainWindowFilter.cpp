@@ -45,12 +45,19 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "searchfunction.h"
 #include "searchlineedit.h"
 #include "tableschema.h"
+#include <QtConcurrent>
 #include <QQuickView>
 #include <QtWidgets>
 #include <QStandardItemModel>
 #include <QtScript>
 #include <QScriptSyntaxCheckResult>
 #include <stdio.h>
+
+QScriptValue runSearchScriptInThread(QScriptValue filterFunctionVal,QScriptValueList args)
+{
+    QScriptValue answer = filterFunctionVal.call(QScriptValue(),args);
+    return answer;
+}
 
 void MainWindow::filterTextChangedSlot()
 {
@@ -191,7 +198,6 @@ void MainWindow::saveFilterStringSlot()
 void MainWindow::filterFunctionSelectedSlot(int index)
 {
     bool bstatus;
-     WorkSheetData::FilterMode filterMode;
     WorkSheet *ws  = qobject_cast <WorkSheet *> (tabW->currentWidget());
     if (!ws) {
         qWarning() << "Filter Failed, work sheet is null" << __FILE__ << __LINE__;
@@ -216,7 +222,6 @@ void MainWindow::filterFunctionSelectedSlot(int index)
 
             }
             filterFunction = *sf;
-            filterMode  = (WorkSheetData::FilterMode) filterButtonGroup->checkedId();
             filterFunction = createRoutine(bstatus,false);
             if (filterFunction.function.length() <  3) {
                 haveFilterFunction = false;
@@ -291,15 +296,18 @@ bool MainWindow::runFilterScript()
         update();
         return false;
     }
+    workSheetDoingFilter = ws;
     if (filterArgList.count() < 1) {
         qWarning() << "No filter arguments provided " << __FILE__ << __LINE__;
         ws->setSearchIndexes(filterLogicalIndexes,0); // no indexes
+        workSheetDoingFilter = 0;
         return false;
     }
     WorkSheetModel *wsm = ws->getModel();
     if (!wsm || (wsm->rowCount() < 1)) {
         qWarning() << "Filter Failed, work sheet model is null, or has no rows" << __FILE__ << __LINE__;
         update();
+        workSheetDoingFilter = 0;
         return false;
     }
     int row=0;
@@ -308,23 +316,26 @@ bool MainWindow::runFilterScript()
 
     filterProgressBar->show();
 
-    for(int i=0;i<wsm->rowCount();i++) {
+    int rowCount = wsm->rowCount();
+    for(int i=0;i<rowCount;i++) {
+        if (ws->cancelFilter) {
+            workSheetDoingFilter = 0;
+            return false;
+        }
         skip = false;
         args.clear();
         item = wsm->item(i,0);
         var  = item->data();
+
         qmsg = (QMessage *) var.value<void *>();
         QVariantList **variantLists;
-        if ((i%100) == 0) {
+        double value;
+        if ((i%200) == 0) {
             qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,50);
-            if (cancelFilter) {
-                cancelFilter = false;
-                filterProgressBar->setValue(0);
-                filterProgressBar->hide();
-
-                return false;
-            }
-            double value = ((double) i/(double)wsm->rowCount())*100.0;
+            if (!ws->cancelFilter && wsm && (wsm->rowCount() > 0))
+                value = ((double) i/(double)wsm->rowCount())*100.0;
+            else
+                value = 0.0;
             filterProgressBar->setValue(value);
         }
         variantLists = new QVariantList *[numOfFilterArguments];
@@ -413,9 +424,11 @@ bool MainWindow::runFilterScript()
                 }
                 // qDebug() << ">>>>>CALL SCRIPT WITH VARGS:" << vargs << __LINE__;
                 //qDebug() << ">>>>>CALL SCRIPT WITH  ARGS COUNT :" << args.count() << __LINE__;
-                answer = filterFunctionVal.call(QScriptValue(), args);
-                //qDebug() << "row" << row << ", answer: " << answer.toBool() << __FILE__ << __LINE__;
-                if (answer.toBool()) {
+                // answer = filterFunctionVal.call(QScriptValue(), args);
+
+                QFuture <QScriptValue> future = QtConcurrent::run(runSearchScriptInThread,filterFunctionVal, args);
+
+                if (future.result().toBool()) {
                     filterLogicalIndexes.append(row);
                     break;
                 }
@@ -431,11 +444,13 @@ bool MainWindow::runFilterScript()
     WorkSheetData::FilterMode filterMode = (WorkSheetData::FilterMode) filterButtonGroup->checkedId();
     ws->setFilterIndexes(filterLogicalIndexes,filterMode); // add mode to this
     filterProgressBar->setValue(100);
-    hideFilterProgressBarTimeID = startTimer(2000);
+    hideFilterProgressBarTimeID = startTimer(2200);
     update();
     updateMessageArea();
+    workSheetDoingFilter = 0;
     return true;
 }
+
 void MainWindow::updateMessageArea()
 {
    // qDebug() << "Update Message Area" << __FILE__ << __LINE__;

@@ -54,7 +54,7 @@ MainWindow::MainWindow(Database *db,bool showLoading)
     : QMainWindow(0),schemaActionGroup(0),fileDialog(0),qmlObject(0),
       windowDataID(-1),loadingActive(showLoading),tableSchema(0),haveFilterFunction(false),
         haveSearchFunction(false),database(db),linkSearchOn(false),fieldUsePairList(0),sharedLib(0),
-        defaultTableSchema(0),schemaList(0),filterRunning(false),cancelFilter(false)
+        defaultTableSchema(0),schemaList(0),filterRunning(false),cancelFilter(false),workSheetDoingFilter(0)
 {
     buildMainWindow();
     if (loadingActive) {

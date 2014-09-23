@@ -138,6 +138,13 @@ void FixTable::redoSearch()
 {
    fixVH->redoSearch();
 }
+void FixTable::cancelFilter()
+{
+    qDebug() << "HERE IN CANCEL FILTER" << __FILE__ << __LINE__;
+    setModel(_model);
+
+    //proxyFilter->
+}
 
 void FixTable::setAnouncement(const QString &message,int interval)
 {
@@ -183,7 +190,7 @@ void FixTable::validateFilters()
         haveFilter = true;
     if (haveFilter) {
             qDebug() << "HAVE FILTER" << __FILE__ << __LINE__;
-            proxyFilter->setSourceModel(_model);
+            //proxyFilter->setSourceModel(_model);
             //proxyFilter->setSortRole();
             setModel(proxyFilter);
             fixVH->setProxyFilter(proxyFilter);
@@ -304,7 +311,7 @@ void  FixTable::mouseMoveEvent(QMouseEvent *event)
     drag->setMimeData(fmd);
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
 }
-void FixTable::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm)
+void FixTable::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm, bool &cancel)
 {
     qDebug() << "FIX TABLE SET LOOGIC FILTER INDEXES, count = " << indexes.count() << __FILE__ << __LINE__;
     logicFilterIndexes = indexes;
@@ -314,7 +321,7 @@ void FixTable::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::Filt
     setSortingEnabled(false);
     proxyFilter->setSourceModel(_model);
     proxyFilter->setSortRole(Qt::UserRole +2 );
-    proxyFilter->setLogicFilterIndexes(indexes,fm);
+    proxyFilter->setLogicFilterIndexes(indexes,fm,cancel);
     setSortingEnabled(true);
     validateFilters();
 }

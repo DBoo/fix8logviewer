@@ -15,10 +15,10 @@ void ProxyFilter::setAcceptedSendIDs(QStringList sendIDs)
     invalidate();
     senderIDs = sendIDs;
 }
-void ProxyFilter::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm)
+void ProxyFilter::setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm,bool &CancelFlag)
 {
     //resetInternalData();
-
+    cancelFlag = &CancelFlag;
     //invalidate();
     logicFilterIndexes = indexes;
 

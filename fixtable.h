@@ -63,6 +63,7 @@ class FixTable: public QTableView {
   bool proxyFilterInUse();
   const ProxyFilter * getProxyFilter();
   const WorkSheetModel *getWorkSheetModel();
+  void cancelFilter();
 
     void redoSearch();
   void setAnouncement(const QString &message,int interval=5000); // milisec
@@ -71,7 +72,7 @@ class FixTable: public QTableView {
   void setSenderIDFilter(QStringList senderIDs);
   void setFieldUsePair(const QList<QPair<QString ,FieldUse *>> *fup);
   void setFilterMode(WorkSheetData::FilterMode fm);
-  void setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm);
+  void setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm,bool &cancel);
   void setLogicColumnMap(QMap <QString, qint16> &);
   void setSearchFilterOn(bool on);
   FixTableVerticaHeaderView *getFixVerticalHeader();

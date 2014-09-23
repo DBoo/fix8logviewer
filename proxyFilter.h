@@ -49,7 +49,7 @@ public:
     bool isRowAccepted();
     void setAcceptedSendIDs(QStringList sendIDs);
     void setLogicFilterMode(WorkSheetData::FilterMode fm);
-    void setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm);
+    void setLogicFilterIndexes(QVector<qint32> indexes,WorkSheetData::FilterMode fm, bool &cancelFlag);
     bool filterAcceptsRow ( int source_row, const QModelIndex & source_parent ) const ;
     static int senderIDRole;
 protected:
@@ -66,6 +66,7 @@ private:
     LogicFilter *logicFilter;
     QVector<qint32> logicFilterIndexes;
     WorkSheetData::FilterMode filterMode;
+    bool *cancelFlag;
 
 };
 #endif

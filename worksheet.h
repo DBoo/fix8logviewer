@@ -143,6 +143,8 @@ protected:
     QAction      *showAllSendersA;
     QMenu        *senderMenu;
     MessageArea   *messageArea; // temp for now - pace holder
+    bool cancelFilter;
+
     void build();
     void buildHeader();
 private:

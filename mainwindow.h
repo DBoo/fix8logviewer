@@ -36,7 +36,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
+#include <QFutureWatcher>
 #include <QMainWindow>
 #include <QQuickItem>
 #include <QtScript>
@@ -386,6 +386,7 @@ private:
     bool filterRunning;
     bool cancelFilter;
     qint32 hideFilterProgressBarTimeID;
+    WorkSheet *workSheetDoingFilter;
 };
 
 #endif // MAINWINDOW_H

@@ -356,6 +356,7 @@ void MainWindow::tabCloseRequestSlot(int tabPosition)
     WorkSheet *worksheet =  qobject_cast <WorkSheet *> (tabW->widget(tabPosition));
     setCursor(Qt::BusyCursor);
     if (worksheet) {
+
         int index = tabW->currentIndex();
         if(index == tabPosition) {
             filterSenderMenuA->setMenu(0);
@@ -381,7 +382,7 @@ void MainWindow::tabCloseRequestSlot(int tabPosition)
     }
     if (worksheet) {
         workSheetList.removeOne(worksheet);
-        delete worksheet;
+        worksheet->deleteLater();
     }
     unsetCursor();
 }
