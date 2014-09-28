@@ -142,7 +142,7 @@ RESOURCES += \
 unix {
 message("Unix Compile.")
 QMAKE_CXXFLAGS += -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wno-missing-field-initializers -Wno-uninitialized -Wno-unused-variable -Wno-unused-parameter -std=c++11
-QMAKE_CXXFLAGS_RELEASE += -O3
+QMAKE_CXXFLAGS_RELEASE += /0x
 LIBS += -lz  -L/usr/local/lib  -lrt -lfix8 -ltbb  -lPocoFoundation -lPocoNet -lPocoUtil
 INCLUDEPATH += /usr/local/include /usr/local/include/fix8
 DEPENDPATH += /usr/local/include
@@ -152,11 +152,11 @@ MOCS-.moc
 }
 win32 {
      message("Windows Compile")
-    CONFIG += console
     SOURCES += qtlockedfile_win.cpp
     QMAKE_CXXFLAGS += /bigobj -D WIN32_LEAN_AND_MEAN
+
     INCLUDEPATH += . \
-                ../fix8/msvc/packages/fix8.dev.1.3.20140907.1/build/native/include \
+                ../fix8/msvc/packages/fix8.dev.1.3.20140922.1/build/native/include \
                 ../fix8/msvc/packages/fix8.dependencies.getopt.1.0.20140509.1/build/native/include \
                 ../fix8/msvc/packages/fix8.dependencies.openssl.1.0.20140509.1/build/native/include/x64/v120/Release/Desktop \
                 ../fix8/msvc/packages/fix8.dependencies.poco.1.5.20140509.1/build/native/include \
@@ -164,7 +164,7 @@ win32 {
 
 release {
    LIBS +=  rpcrt4.lib \
-        ../fix8/msvc/packages/fix8.dev.1.3.20140907.1/build/native/lib/x64/v120/Release/Desktop/fix8.lib \
+        ../fix8/msvc/packages/fix8.dev.1.3.20140922.1/build/native/lib/x64/v120/Release/Desktop/fix8.lib \
         ../fix8/msvc/packages/fix8.dependencies.tbb.4.2.20140416.1/build/native/lib/x64/v120/Release/Desktop/tbb.lib \
         ../fix8/msvc/packages/fix8.dependencies.tbb.4.2.20140416.1/build/native/lib/x64/v120/Release/Desktop/tbbmalloc_proxy.lib \
         ../fix8/msvc/packages/fix8.dependencies.tbb.4.2.20140416.1/build/native/lib/x64/v120/Release/Desktop/tbbmalloc.lib \
@@ -176,7 +176,7 @@ release {
 }
 debug {
 LIBS +=  rpcrt4.lib \
-        ../fix8/msvc/packages/fix8.dev.1.3.20140907.1/build/native/lib/x64/v120/Debug/Desktop/fix8d.lib \
+        ../fix8/msvc/packages/fix8.dev.1.3.20140922.1/build/native/lib/x64/v120/Debug/Desktop/fix8d.lib \
         ../fix8/msvc/packages/fix8.dependencies.tbb.4.2.20140416.1/build/native/lib/x64/v120/Debug/Desktop/tbb_debug.lib \
         ../fix8/msvc/packages/fix8.dependencies.tbb.4.2.20140416.1/build/native/lib/x64/v120/Debug/Desktop/tbbmalloc_proxy_debug.lib \
         ../fix8/msvc/packages/fix8.dependencies.tbb.4.2.20140416.1/build/native/lib/x64/v120/Debug/Desktop/tbbmalloc_debug.lib \

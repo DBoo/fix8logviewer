@@ -252,13 +252,15 @@ bool WorkSheet::loadFileConcurrently(QString &fileName,
     setTimeFormat(GUI::Globals::timeFormat);
 
     fixTable->setSortingEnabled(true);
-
-    qstr = QString::number(_model->rowCount()) + tr(" Messages were read from file: ") + fileName;
-    msgList.append(GUI::ConsoleMessage(qstr));
+    float timeOfLoad = (double)(myTimer.elapsed())/1000.0;
+    //qstr = "Loading of file " + fileName + " completed. " + QString::number(_model->rowCount()) + " records in " +  QString::number(timeOfLoad,'g',3) + " seconds";
+   // msgList.append(GUI::ConsoleMessage(qstr));
+    qstr = fileName + " completed. " +  QString::number(_model->rowCount()) + " records";
+    //statusBar()->showMessage(qstr,4500);
+   // setToolTip(QString::number(_model->rowCount()) + " records");
     setUpdatesEnabled(true);
  //   showLoadProcess(false);
     returnCode = OK;
-   qDebug() << "Elapsed time of load = " << myTimer.elapsed() << __FILE__ << __LINE__;
    showLoadProcess(false);
 
     return true;

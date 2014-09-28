@@ -121,8 +121,8 @@ TabView {
                 font.pointSize: 14
                 readOnly: true
                 textFormat: TextEdit.RichText
-                text:  '<html> <body> To report or check on a bug please visit <a href="https://www.fix8.org">Fix8 Community Forum/Tools</a></body></html>'
-                onLinkActivated:  Qt.openUrlExternally("https://fix8.org")
+                text:  '<html> <body> For suggestions, assistance, or to report a bug please visit <a href="www.fix8.org/support.html">Fix8 Community Forum/Tools</a></body></html>'
+                onLinkActivated:  Qt.openUrlExternally("http://www.fix8.org/support")
             }
         }
     }

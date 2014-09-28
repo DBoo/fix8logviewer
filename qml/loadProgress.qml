@@ -85,17 +85,17 @@ Rectangle {
         id:message
         font.bold: true;
         font.italic: true
-        font.pointSize: 18
+        font.pointSize: 14
         color:"black"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: horLine.bottom
-        anchors.topMargin: 150
+        anchors.topMargin: 120
     }
     Text {
         id:message2
         font.bold: true;
         font.italic: true
-        font.pointSize: 16
+        font.pointSize: 14
 
         color:"black"
         anchors.horizontalCenter: parent.horizontalCenter

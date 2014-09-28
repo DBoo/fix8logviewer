@@ -87,7 +87,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     friend class Fix8Log;
 public:
-    MainWindow(Database *database,bool showLoading=false);
+    MainWindow(Database *database,bool showLoading=false,QWidget *parent=0);
     MainWindow(MainWindow & sibling,Database *database,bool copyAll = false);
     ~MainWindow();
     void addNewSchema(TableSchema *);

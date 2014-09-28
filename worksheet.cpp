@@ -348,7 +348,6 @@ QMessageList *WorkSheet::getMessageList()
 void WorkSheet::terminate()
 {
     // in case loadFile is going on
-    qDebug() << "TERMINATE WORK SHEET" << __FILE__ << __LINE__;
     showLoadProcess(false);
     cancelFilter = true;
     cancelLoad = true;
@@ -376,7 +375,6 @@ bool WorkSheet::loadFileName(QString &fileName,
     qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,5);
     //setUpdatesEnabled(false);
    // showLoadProcess(true);
-
     bstatus =  dataFile.open(QIODevice::ReadOnly);
     if (!bstatus) {
         GUI::ConsoleMessage message(tr("Failed to open file: ") + fileName);
@@ -396,16 +394,13 @@ bool WorkSheet::loadFileName(QString &fileName,
     showLoadProcess(true,linecount);
     dataFile.seek(0);
     int i=0;
-    QElapsedTimer myTimer;
     int nMilliseconds;
     qint32 fileSize = dataFile.size();
 
 
-    myTimer.start();
     QMap <QString, qint32> senderMap; // <sender id, numofoccurances>
     messageList = new QMessageList();
     QMessage *messageArray = new QMessage[linecount];
-
 
 
     char c[60];
@@ -425,6 +420,8 @@ bool WorkSheet::loadFileName(QString &fileName,
             sender_comp_id senderID;
             ba = dataFile.readLine();
             ba.truncate(ba.size()-1);
+            //qDebug() << "Shared Lib function " << sharedLib->fileName;
+            //qDebug() << "Size of Byte Array " << ba.size() << __FILE__ << __LINE__;
             Message *msg = Message::factory(sharedLib->ctxFunc(),ba.data());
             msg->Header()->get(snum);
             msg->Header()->get(senderID);
@@ -546,12 +543,11 @@ bool WorkSheet::loadFileName(QString &fileName,
 
     fixTable->setSortingEnabled(true);
 
-    qstr = QString::number(_model->rowCount()) + tr(" Messages were read from file: ") + fileName;
-    msgList.append(GUI::ConsoleMessage(qstr));
     setUpdatesEnabled(true);
  //   showLoadProcess(false);
     returnCode = OK;
-   qDebug() << "Elapsed time of load = " << myTimer.elapsed() << __FILE__ << __LINE__;
+    setToolTip(QString::number(_model->rowCount()) + " records");
+
    showLoadProcess(false);
 
     return true;
@@ -829,3 +825,11 @@ void WorkSheet::threadLoaderFinishedSlot()
     _model->moveToThread(thrd);
     qDebug() << "THREADER FINISHED" << __FILE__ << __LINE__;
 }
+qint64 WorkSheet::getNumOfRecords()
+{
+    qint64 returnValue = 0;
+    if (_model)
+        returnValue = _model->rowCount();
+    return returnValue;
+}
+

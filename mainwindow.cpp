@@ -50,8 +50,8 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <QStandardItemModel>
 
 
-MainWindow::MainWindow(Database *db,bool showLoading)
-    : QMainWindow(0),schemaActionGroup(0),fileDialog(0),qmlObject(0),
+MainWindow::MainWindow(Database *db,bool showLoading,QWidget *parent)
+    : QMainWindow(parent),schemaActionGroup(0),fileDialog(0),qmlObject(0),
       windowDataID(-1),loadingActive(showLoading),tableSchema(0),haveFilterFunction(false),
         haveSearchFunction(false),database(db),linkSearchOn(false),fieldUsePairList(0),sharedLib(0),
         defaultTableSchema(0),schemaList(0),filterRunning(false),cancelFilter(false),workSheetDoingFilter(0)
@@ -1099,6 +1099,8 @@ void MainWindow::addWorkSheet(WorkSheetData &wsd)
     tabW->setCurrentWidget(workSheet);
     stackW->setCurrentWidget(workAreaSplitter);
     //workSheet->setUpdatesEnabled(false);
+    QElapsedTimer loadTimer;
+    loadTimer.start();
     bstatus = workSheet->loadFileName(wsd.fileName,messageList,tableSchema,returnStatus);
     if (!bstatus) {
         if (returnStatus == WorkSheet::TERMINATED) {
@@ -1142,12 +1144,14 @@ void MainWindow::addWorkSheet(WorkSheetData &wsd)
         workSheet->setMessageAreaExpansion(MessageArea::FieldsItem,wsd.fieldsExpanded);
         workSheet->setMessageAreaExpansion(MessageArea::TrailerItem,wsd.trailerExpanded);
        // workSheet->setUpdatesEnabled(true);
-
-        workSheetList.append(workSheet);
-        str = "Loading of file " + wsd.fileName + " Completed";
+        float timeOfLoad = (double)(loadTimer.elapsed())/1000.0;
+                workSheetList.append(workSheet);
+        str = "Loading of file " + wsd.fileName + " completed. " + QString::number(workSheet->getNumOfRecords()) + " records in " +  QString::number(timeOfLoad,'g',3) + " seconds";
         GUI::ConsoleMessage msg(str,GUI::ConsoleMessage::InfoMsg);
         messageList.append(msg);
-        statusBar()->showMessage(str,3000);
+        str = wsd.fileName + " completed. " +  QString::number(workSheet->getNumOfRecords()) + " records";
+        workSheet->setToolTip(QString::number(workSheet->getNumOfRecords()) + " records");
+        statusBar()->showMessage(str,4500);
     }
 
     if (messageList.count() > 0) {
@@ -1187,7 +1191,9 @@ void MainWindow::addWorkSheet(WorkSheetModel *model,WorkSheetData &wsd)
         stackW->setCurrentIndex(currentIndex);
         return;
     }
+
     newWorkSheet = new WorkSheet(model,wsd,this);
+
     newWorkSheet->setMessageAreaExpansion(MessageArea::HeaderItem,wsd.headerExpanded);
     newWorkSheet->setMessageAreaExpansion(MessageArea::FieldsItem,wsd.fieldsExpanded);
     newWorkSheet->setMessageAreaExpansion(MessageArea::TrailerItem,wsd.trailerExpanded);

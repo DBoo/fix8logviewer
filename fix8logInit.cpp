@@ -35,6 +35,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include "database.h"
 #include "fix8log.h"
+#include "fix8sharedlib.h"
 #include "fixmimedata.h"
 #include "globals.h"
 #include "mainwindow.h"
@@ -86,7 +87,7 @@ bool Fix8Log::init()
     bool haveError = false;
     readSettings();
     initDatabase();
-   //QThreadPool::globalInstance()->setMaxThreadCount(20);
+    //QThreadPool::globalInstance()->setMaxThreadCount(20);
 
     // QListIterator <QPair<QString ,FieldUse *>> pairListIter(fix8shareLib->fieldUsePairList);
 
@@ -97,14 +98,14 @@ bool Fix8Log::init()
     qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,10);
     QListIterator <WindowData> iter(windowDataList);
     Fix8SharedLib  *fixlib;
-//    qDebug() << "AUTO SAVE ON:" << autoSaveOn << __FILE__ << __LINE__;
+    //    qDebug() << "AUTO SAVE ON:" << autoSaveOn << __FILE__ << __LINE__;
     if (autoSaveOn){
         while(iter.hasNext()) {
             wd = iter.next();
             if (wd.fix8sharedlib.length() > 0) {
                 fixlib = fix8ShareLibList.findByFileName(wd.fix8sharedlib);
                 if (!fixlib) {
-                    qDebug() << "Create Shared Lib" << __FILE__ << __LINE__;
+                   // qDebug() << "Create Shared Lib" << __FILE__ << __LINE__;
                     bstatus = createSharedLib(wd.fix8sharedlib,&fixlib,defaultTableSchema);
                     if (!bstatus)
                         goto done;
@@ -118,7 +119,7 @@ bool Fix8Log::init()
                 }
                 else
                     fixlib->generateSchema(wd.tableSchema);
-                newMW  = new MainWindow(database,true);
+                newMW  = new MainWindow(database,true,0);
                 newMW->setSharedLibrary(fixlib);
                 //newMW->setTableSchema(wd.tableSchema);
                 newMW->setFieldUsePair(&(fixlib->fieldUsePairList));
@@ -151,7 +152,7 @@ bool Fix8Log::init()
 
             }
 
-        done:
+done:
             ;
         }
     }
@@ -163,7 +164,7 @@ bool Fix8Log::init()
         else
             newWindowWizard->resize(newWindowWizard->sizeHint());
 
-       // QDesktopWidget *desktop = QApplication::desktop();
+        // QDesktopWidget *desktop = QApplication::desktop();
         status = newWindowWizard->exec();
         newWindowWizard->saveSettings();
         if (status != QDialog::Accepted) {
@@ -264,10 +265,19 @@ bool Fix8Log::createSharedLib(QString &fix8sharedlib,Fix8SharedLib **fixlib,
     bool bstatus;
     TableSchemaList *tsl;
     *fixlib = Fix8SharedLib::create(fix8sharedlib);
-    if (!fixlib || !(*fixlib)->isOK) {
-        qWarning() << "FAILED TO CREATED SHARED LIB FOR " << fix8sharedlib;
+    if (!fixlib) {
+        qWarning() << "Create shared lib vailed, value is null" << __FILE__ << __LINE__;
         return false;
     }
+    if (!*fixlib) {
+        qWarning() << "1 FAILED TO CREATED SHARED LIB FOR " << fix8sharedlib;
+        return false;
+    }
+    if(!(*fixlib)->isOK) {
+        qWarning() << "2 FAILED TO CREATED SHARED LIB FOR " << fix8sharedlib;
+        return false;
+    }
+
 
     tsl  = database->getTableSchemasByLibName((*fixlib)->fileName);
     if (!tsl) {
@@ -279,7 +289,7 @@ bool Fix8Log::createSharedLib(QString &fix8sharedlib,Fix8SharedLib **fixlib,
     while(tsiter.hasNext()) {
         TableSchema *ts = tsiter.next();
         ts->fieldNames = database->getSchemaFields(ts->id);
-         (*fixlib)->generateSchema(ts);
+        (*fixlib)->generateSchema(ts);
     }
     (*fixlib)->setTableSchemas(tsl);
     defaultTableSchema  = tsl->findDefault();

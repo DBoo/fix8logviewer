@@ -36,8 +36,16 @@ Fix8SharedLib * Fix8SharedLib::create(QString fileName)
     }
     QFileInfo fi(fileName);
     QString baseName = fi.baseName();
+    //qDebug() << "BASE NAME = " << baseName << __FILE__ << __LINE__;
+    QString windowsDebugName;
 #ifdef Q_OS_WIN
-        f8sl->name = baseName;
+        windowsDebugName = baseName.toUpper();
+        if (windowsDebugName.endsWith('d',Qt::CaseInsensitive)) {
+            qDebug() << "WINDOWS DEBUG LIBRARY" << windowsDebugName <<  __FILE__ << __LINE__;
+            windowsDebugName.truncate(windowsDebugName.length()-1);
+            qDebug() << "NEW NAME SET TO  << " << windowsDebugName << __FILE__ << __LINE__;
+        }
+         f8sl->name = windowsDebugName;
 #else
     QString libStr = baseName.left(3);
     if (libStr != "lib") {
@@ -49,11 +57,11 @@ Fix8SharedLib * Fix8SharedLib::create(QString fileName)
     f8sl->name = baseName.right(baseName.length()-3);
 #endif
     bstatus = f8sl->loadFix8so();
-    qDebug() << "\tAFTER LOAD bstatus =" << bstatus << __FILE__ << __LINE__;
+   // qDebug() << "\tAFTER LOAD bstatus =" << bstatus __FILE__ << __LINE__;
     if (bstatus)
         f8sl->isOK = true;
     else
-        f8sl = 0;
+        f8sl = false;
     return f8sl;
 }
 TableSchema * Fix8SharedLib::getTableSchema(qint32 tableSchemaID)
@@ -124,7 +132,9 @@ bool Fix8SharedLib::loadFix8so()
     QString value;
     QString fieldName;
     MessageField *messageField;
-    fixLib = new QLibrary(fileName);
+    qDebug() << "LOAD LIBRARY = " << fileName << __FILE__ << __LINE__;
+    QString fn = fileName;
+    fixLib = new QLibrary(fn);
 
     bstatus = fixLib->load();
     if (!bstatus) {
@@ -134,6 +144,7 @@ bool Fix8SharedLib::loadFix8so()
         delete fixLib;
         return false;
     }
+   // qDebug() << "FIX* Lib load = 0k" << __FILE__ << __LINE__;
     QFunctionPointer _handle;
     QString ctxStr(name + "_ctx");
     const char *ctxfuncstr = ctxStr.toLatin1().data();
@@ -145,13 +156,15 @@ bool Fix8SharedLib::loadFix8so()
         return false;
     }
      try {
+        qDebug() << "\tTRY TO RESOLVE NAME FOR LIB...";
     _handle = fixLib->resolve(ctxfuncstr);
     }
     catch (exception& e) {
+        qDebug() << "\t\tCAUGHT ERROR";
         std::cout << "ERROR IN RESOLVING LIB:";
     }
     if (!_handle ||  _handle == 0) {
-        //qWarning()  << "Failed to get handle " << ctxStr << " in library: " << fileName << __FILE__ << __LINE__;
+        qWarning()  << "Failed to get handle " << ctxStr << " in library: " << fileName << __FILE__ << __LINE__;
         errorMessage = "Failed to get handle " +  ctxStr +  " in library: " + fileName;
         isOK = false;
         //delete fixLib;

@@ -77,6 +77,7 @@ public:
         OPEN_FAILED=0x0080,TERMINATED=0x0100};
     ~WorkSheet();
     bool copyFrom(WorkSheet &oldws);
+    qint64 getNumOfRecords();
     QVector <qint32> getSearchIndexes();
     bool loadCanceled();
     void setFilterMode(WorkSheetData::FilterMode);

@@ -14,7 +14,6 @@ class Fix8SharedLib
 {
 public:
     Fix8SharedLib();
-
     static Fix8SharedLib *create(QString fileName);
     typedef enum {SystemLib,UserLib} LibType;
     void setDefaultTableSchema(TableSchema *defaultTS);

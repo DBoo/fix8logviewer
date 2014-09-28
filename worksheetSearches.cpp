@@ -61,6 +61,7 @@ using namespace FIX8;
 void WorkSheet::setSearchIndexes(const QVector<qint32> &indexes,QList <QStandardItem *> *items)
 {
     //qDebug() << "Work Sheet, set vertical headers to " << indexes << __FILE__ << __LINE__;
+
     searchLogicalIndexes = indexes;
     FixTableVerticaHeaderView *fvh = fixTable->getFixVerticalHeader();
     fvh->setHighlightList(searchLogicalIndexes,items);

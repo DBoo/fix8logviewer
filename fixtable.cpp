@@ -95,7 +95,7 @@ FixTable::FixTable(QUuid &wid, QUuid &wsid,QWidget *p):
     emptyStr2 = tr("Data");
     emptyFont   = font();
     emptyFont.setBold(true);
-    emptyFont.setPointSize(emptyFont.pointSize() + 8);
+    emptyFont.setPointSize(emptyFont.pointSize() + 4);
     emptyStrColor.setRgb(239,237,213);
     fixHeader = new FixHeaderView();
     setHorizontalHeader(fixHeader);

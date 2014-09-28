@@ -45,6 +45,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "searchfunction.h"
 #include "searchlineedit.h"
 #include "tableschema.h"
+#include <QFuture>
 #include <QtConcurrent>
 #include <QQuickView>
 #include <QtWidgets>
@@ -70,7 +71,7 @@ void MainWindow::validateFilterText()
     if (filterFunctionMap.contains(filterText)) {
         int index = filterFunctionMap.value(filterText);
         QVariant var = filterSelectCB->itemData(index);
-         SearchFunction *sf = (SearchFunction *) var.value<void *>();
+        SearchFunction *sf = (SearchFunction *) var.value<void *>();
         filterSelectCB->setCurrentIndex(index);
     }
     else {
@@ -206,7 +207,7 @@ void MainWindow::filterFunctionSelectedSlot(int index)
     }
     if (index == 0) {
         filterLineEdit->setText("");
-         ws->wipeFilter();
+        ws->wipeFilter();
     }
     else {
         QVariant var = filterSelectCB->itemData(index);
@@ -219,7 +220,6 @@ void MainWindow::filterFunctionSelectedSlot(int index)
             filterLineEdit->setText(sf->function);
             if (*sf == filterFunction) {
                 return;
-
             }
             filterFunction = *sf;
             filterFunction = createRoutine(bstatus,false);
@@ -233,7 +233,7 @@ void MainWindow::filterFunctionSelectedSlot(int index)
         }
     }
     if (index != 0)
-         runFilterScript();
+        runFilterScript();
 }
 void MainWindow::filterToolbarVisibleSlot(bool visible)
 {
@@ -259,19 +259,19 @@ void MainWindow::filterModeChangedSlot(int fm)
         qWarning() << "Filter Failed, work sheet is null" << __FILE__ << __LINE__;
         update();
         return;
-    } 
+    }
     SearchFunction newfilterFunction = createRoutine(bstatus,false);
-   /*
+    /*
     *  if ( filterFunction == newfilterFunction) {
         qDebug() << "FILTERS ARE THE SAME" << __FILE__ <<__LINE__;
         ws->setFilterMode(filterMode);
     }
     else {
     */
-     //   qDebug() << "DIFFFRENT FILTERS RUN AGAIN...";
-        runFilterScript();
+    //   qDebug() << "DIFFFRENT FILTERS RUN AGAIN...";
+    runFilterScript();
     //}
-        updateMessageArea();
+    updateMessageArea();
     update();
 }
 bool MainWindow::runFilterScript()
@@ -312,10 +312,9 @@ bool MainWindow::runFilterScript()
     }
     int row=0;
     int numOfFilterArguments = filterArgList.count();
-    QStringListIterator iter(filterArgList);
-
+    QStringListIterator filterIter(filterArgList);
+    QString filterArg;
     filterProgressBar->show();
-
     int rowCount = wsm->rowCount();
     for(int i=0;i<rowCount;i++) {
         if (ws->cancelFilter) {
@@ -325,86 +324,81 @@ bool MainWindow::runFilterScript()
         skip = false;
         args.clear();
         item = wsm->item(i,0);
-        var  = item->data();
-
-        qmsg = (QMessage *) var.value<void *>();
-        QVariantList **variantLists;
+        if (item)  {
+            var  = item->data();
+            qmsg = (QMessage *) var.value<void *>();
+        }
+        else  {
+            qmsg = 0;
+        }
+        QVector <QVector<QVariant> > vectors(numOfFilterArguments);
         double value;
         if ((i%200) == 0) {
             qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,50);
-            if (!ws->cancelFilter && wsm && (wsm->rowCount() > 0))
+            if (!ws->cancelFilter && wsm && (rowCount > 0)) {
                 value = ((double) i/(double)wsm->rowCount())*100.0;
+            }
             else
                 value = 0.0;
             filterProgressBar->setValue(value);
         }
-        variantLists = new QVariantList *[numOfFilterArguments];
+        filterIter.toFront();
         // gets list of all values of messages that apply to search arguments
-        int skipPoint = 0;
-        for(int j=0;j<numOfFilterArguments;j++) {
-            variantLists[j] = new QVariantList();
-            arg = filterArgList.at(j);
-            //qDebug() << "Look for arg:" << arg << __FILE__ << __LINE__;
-            if (qmsg->map.contains(arg)) {
-                //qDebug() << "\tItem found in row" << __FILE__ <<  __LINE__;
-                QMultiMap<QString,QVariant>::iterator miter = qmsg->map.find(arg);
-                while (miter != qmsg->map.end() &&  miter.key() == arg) {
-                    var1 = miter.value();
-                    variantLists[j]->append(var1);
-                    miter++;
+        if (qmsg) {
+            for (int vi=0;vi < vectors.size();vi++) {
+                arg = filterIter.next();
+                if (qmsg->map.contains(arg)) {
+                    QMultiMap<QString,QVariant>::iterator miter = qmsg->map.find(arg);
+                    while (miter != qmsg->map.end() &&  miter.key() == arg) {
+                        var1 = miter.value();
+                        vectors[vi].append(var1);
+                        miter++;
+                    }
+                }
+                else {
+                    skip = true;
+                    break; // nbsps
                 }
             }
-            else {
-                //qDebug() << "\tSkip it" << __LINE__;
-                skipPoint = j;
-                skip = true;
-                break; // nbsps
-            }
         }
-        if (skip) {
-            for (int j=0;j< skipPoint;j++) {
-                delete  variantLists[j];
-            }
-            delete [] variantLists;
+        else {
+            skip = true;
         }
-        else  {
-            QVariant **vector=0;
+        if (!skip) {
             int totalSize = 1;
             int repeatLength=1;
             //iteratate over rows, then columns
-            for(int ii=0;ii<numOfFilterArguments;ii++)
-                totalSize = totalSize* variantLists[ii]->count();
-            vector = new QVariant*[totalSize]; // double array
-            for(int ii=0;ii< numOfFilterArguments;ii++)
-                vector[ii] = new QVariant[numOfFilterArguments];
+
+            for(int vj=0;vj< vectors.count();vj++) {
+                totalSize = totalSize* (vectors[vj].count());
+            }
+            QVector<QVector <QVariant>> dataArray(totalSize);
+
+            for(int a=0;a< totalSize;a++) {
+                dataArray[a].resize(vectors.count());
+            }
             repeatLength= 1;
-            for(int ii=0;ii<numOfFilterArguments;ii++) {
-                if (variantLists[ii]->count() ==0 ) {
-                    qWarning() << "ERROR NO VALUES IN VECTOR" << __FILE__ << __LINE__;
-                }
-                else {
-                    repeatLength = totalSize/(repeatLength * (variantLists[ii]->count()));
-                    int k = 0;
-                    int m = 0;
-                    for(int j=0;j<totalSize;j++) {
-                        vector[j][ii]  = variantLists[ii]->at(k);
-                        m++; // should tis be incremented at end of loop
-                        if (m >= repeatLength) {
-                            m = 0;
-                            k++;
-                            if (k > variantLists[ii]->count())
-                                k = 0;
-                        }
+            int k = 0;
+            int m = 0;
+
+            for (int vk = 0; vk < vectors.count(); vk ++) {
+                k = 0;
+                repeatLength = totalSize/(repeatLength * (vectors[vk].count()));
+
+                for(int vl = 0; vl < totalSize;vl++) {
+                    dataArray[vl][vk] = vectors[vk][k];
+                    if ((vl%repeatLength) == 0) {
+                        k++;
                     }
                 }
             }
             QVariantList vargs;
             QVariant mvar;
-            for (int ii=0;ii<totalSize;ii++) {
+            for(int vm = 0;vm < totalSize; vm++) {
                 args.clear();
                 vargs.clear();
-                for (int j=0;j< filterArgList.count();j++) {
-                    mvar = vector[ii][j];
+                for (int vn = 0;vn < vectors.count(); vn++) {
+                    mvar = dataArray[vm][vn];
                     switch (mvar.type()) {
                     case QVariant::Int:
                         args <<  mvar.toInt();
@@ -422,24 +416,15 @@ bool MainWindow::runFilterScript()
                         qWarning() << "Unknown variarnt type in message" << __FILE__ << __LINE__;
                     }
                 }
-                // qDebug() << ">>>>>CALL SCRIPT WITH VARGS:" << vargs << __LINE__;
-                //qDebug() << ">>>>>CALL SCRIPT WITH  ARGS COUNT :" << args.count() << __LINE__;
-                // answer = filterFunctionVal.call(QScriptValue(), args);
-
                 QFuture <QScriptValue> future = QtConcurrent::run(runSearchScriptInThread,filterFunctionVal, args);
-
+                //future.waitForFinished();
                 if (future.result().toBool()) {
                     filterLogicalIndexes.append(row);
                     break;
                 }
             }
-            for (int ii=0;ii<numOfFilterArguments;ii++) {
-                delete []vector[ii];
-            }
-            delete []vector;
-            vector = 0;
+            row++;
         }
-        row++;
     }
     WorkSheetData::FilterMode filterMode = (WorkSheetData::FilterMode) filterButtonGroup->checkedId();
     ws->setFilterIndexes(filterLogicalIndexes,filterMode); // add mode to this
@@ -450,14 +435,12 @@ bool MainWindow::runFilterScript()
     workSheetDoingFilter = 0;
     return true;
 }
-
 void MainWindow::updateMessageArea()
 {
-   // qDebug() << "Update Message Area" << __FILE__ << __LINE__;
-   WorkSheet *ws  = qobject_cast <WorkSheet *> (tabW->currentWidget());
-   if (!ws) {
-       qWarning() << "Filter Failed, work sheet is null" << __FILE__ << __LINE__;
-       return;
-   }
-   ws->validateSelection();
+    WorkSheet *ws  = qobject_cast <WorkSheet *> (tabW->currentWidget());
+    if (!ws) {
+        qWarning() << "Filter Failed, work sheet is null" << __FILE__ << __LINE__;
+        return;
+    }
+    ws->validateSelection();
 }

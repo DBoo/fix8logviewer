@@ -137,7 +137,12 @@ void Fix8Log::createNewWindowSlot(MainWindow *mw)
         newMW->setWindowData(mw->getWindowData());
 
         newMW->show();
+        QElapsedTimer loadTimer;
+        loadTimer.start();
         newMW->loadFile(fileName);
+        float timeOfLoad = (double)(loadTimer.elapsed())/1000.0;
+        str = "Loading of file " + fileName + " completed in " +  QString::number(timeOfLoad,'g',3) + " seconds";
+         GUI::ConsoleMessage msg(str);
         mainWindows.append(newMW);
     }
     newWindowWizard->saveSettings();
@@ -184,11 +189,11 @@ void Fix8Log::createNewWindowSlot(MainWindow *mw)
 }
 void Fix8Log::deleteMainWindowSlot(MainWindow *mw)
 {
-    qDebug() << "DELETE MAIN WINDOW SLOT, window count = "<< mainWindows.count() << __FILE__ << __LINE__;
+    //qDebug() << "DELETE MAIN WINDOW SLOT, window count = "<< mainWindows.count() << __FILE__ << __LINE__;
     if (mainWindows.count() == 1)  {
 
         if (autoSaveOn) {
-            qDebug() << "\tSavie Session....";
+            // qDebug() << "\tSavie Session....";
             saveSession();
         }
     }
@@ -204,7 +209,7 @@ void Fix8Log::deleteMainWindowSlot(MainWindow *mw)
             schemaEditorDialog->windowDeleted(mw);
         writeSettings();
         qApp->closeAllWindows(); // close any dialog
-       // qApp->exit();
+        qApp->exit();
     }
 
 }

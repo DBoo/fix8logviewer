@@ -155,8 +155,10 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
         quint32 returnStatus = 0;
         //workSheet->setUpdatesEnabled(false);
         setCursor(Qt::BusyCursor);
-
+        QElapsedTimer loadTimer;
+        loadTimer.start();
         bstatus = workSheet->loadFileName(fileName,messageList,tableSchema,returnStatus);
+        float timeOfLoad = (double)(loadTimer.elapsed())/1000.0;
         unsetCursor();
         if (!bstatus) {
             if (returnStatus == WorkSheet::TERMINATED) {
@@ -196,7 +198,8 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
         else {
             workSheet->setUpdatesEnabled(true);
             workSheetList.append(workSheet);
-            str = "Loaded " + fileName + " completed";
+            str = "Loading of file " + fileName + " completed. " + QString::number(workSheet->getNumOfRecords()) + " records in " +  QString::number(timeOfLoad,'g',3) + " seconds";
+            GUI::ConsoleMessage msg(str,GUI::ConsoleMessage::InfoMsg);
             statusBar()->showMessage(str,2000);
             filterSenderMenuA->setMenu(workSheet->getSenderMenu());
             SearchFunction sf = workSheet->getSearchFunction();

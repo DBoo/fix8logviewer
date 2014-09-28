@@ -57,9 +57,9 @@ void NewWindowWizard::createSchemaPage()
     schemaPage = new NewWindowSchemaPage(fix8SharedLibList,this);
 
     bool bstatus = schemaPage->loadSchemas(Fix8SharedLib::SystemLib);
-    qDebug() << "Status of load System LIBS = " << bstatus;
+    //qDebug() << "Status of load System LIBS = " << bstatus;
     bstatus = schemaPage->loadSchemas(Fix8SharedLib::UserLib);
-    qDebug() << "Status of load User libs = " << bstatus << __FILE__ << __LINE__;
+    //qDebug() << "Status of load User libs = " << bstatus << __FILE__ << __LINE__;
     if (schemaPage->schemaModel->rowCount() < 1) {
         schemaPage->schemaStack->setCurrentIndex(schemaPage->noSchemasID);
     }
@@ -78,13 +78,13 @@ void NewWindowWizard::createFilePage()
 }
 void NewWindowWizard::readSettings()
 {
-    qDebug() << "NEW WINDOW WIZARD READ SETTINGS...." << __FILE__ << __LINE__;
+    //qDebug() << "NEW WINDOW WIZARD READ SETTINGS...." << __FILE__ << __LINE__;
     QSettings settings("fix8","logviewerNewWindowWizard");
     QSize sh = sizeHint();
     QRect defaultRect(0,100,sh.width(),sh.height());
     QVariant defaultVar(defaultRect);
     filePage->readSettings();
-    qDebug() << "After first page read settings";
+    //qDebug() << "After first page read settings";
     QRect rect = settings.value("geometry",defaultRect).toRect();
     setGeometry(rect);
     resize(rect.width(),rect.height());

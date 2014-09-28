@@ -109,14 +109,18 @@ void Fix8Log::exitAppSlot()
     if (autoSaveOn)
         saveSession();
     //writeSettings();
-    qApp->closeAllWindows();
+    //qApp->closeAllWindows();
     qDebug() << "CALL QUIT" << __FILE__ << __LINE__;
-    bool bstatus = QThreadPool::globalInstance()->waitForDone(1000);
+    bool bstatus = QThreadPool::globalInstance()->waitForDone(200);
+     QThreadPool::globalInstance()->releaseThread();
     qDebug() << "Status of wait for done = " << bstatus << __FILE__ << __LINE__;
-    if (bstatus)
-        qApp->quit();
-    else
-        qApp->exit(0);
+    QListIterator <MainWindow *> iter(mainWindows);
+    MainWindow *mw;
+    while(iter.hasNext()) {
+        mw = iter.next();
+        mw->deleteLater();
+    }
+    qApp->exit(0);
 }
 void Fix8Log::toolButtonStyleModfiedSlot(Qt::ToolButtonStyle tbs)
 {

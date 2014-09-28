@@ -145,6 +145,7 @@ private:
     NewWindowWizard *newWindowWizard;
     Fix8SharedLibList fix8ShareLibList;
     QFile *dbFile;
+    QWidget *hiddenParent;
 };
 
 #endif // FIX8LOG_H

@@ -4,7 +4,6 @@ QT.xlsx.MINOR_VERSION = 3
 QT.xlsx.PATCH_VERSION = 0
 QT.xlsx.name = QtXlsx
 QT.xlsx.libs = $$QT_MODULE_LIB_BASE
-QT.xlsx.rpath = /opt/Qt/5.3/gcc_64/lib
 QT.xlsx.includes = $$QT_MODULE_INCLUDE_BASE $$QT_MODULE_INCLUDE_BASE/QtXlsx
 QT.xlsx.bins = $$QT_MODULE_BIN_BASE
 QT.xlsx.libexecs = $$QT_MODULE_LIBEXEC_BASE

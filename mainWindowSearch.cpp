@@ -53,6 +53,7 @@ HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <QtScript>
 #include <QScriptSyntaxCheckResult>
 #include <stdio.h>
+extern QScriptValue runSearchScriptInThread(QScriptValue filterFunctionVal,QScriptValueList args);
 
 void MainWindow::searchTextChangedSlot()
 {
@@ -263,7 +264,7 @@ void MainWindow::searchReturnSlot()
 
 }
 QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *wsm,QScriptValue &searchFunctionVal, QStringList &searchArgList,
-                           QVector <qint32> *filterLogicalIndexes)
+                                                QVector <qint32> *filterLogicalIndexes)
 {
     bool  skip = false;
     QScriptValueList args;
@@ -276,7 +277,7 @@ QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *ws
     int numOfSearchArguments = searchArgList.count();
     QStringListIterator iter(searchArgList);
 
-     QList <QStandardItem *> *items = new QList <QStandardItem *>();
+    QList <QStandardItem *> *items = new QList <QStandardItem *>();
 
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
@@ -399,7 +400,7 @@ bool MainWindow::runSearchScript()
     QMessage *qmsg;
     QVariant var,var1;
     QString arg;
-    QVector <qint32> filterLogicalIndexes;
+    QVector <qint32> searchIndexes;
 
     searchFunctionVal = engine.evaluate(searchFunction.javascript);
     if (tabW->count()  < 1) {
@@ -417,7 +418,7 @@ bool MainWindow::runSearchScript()
     }
     if (searchArgList.count() < 1) {
         qWarning() << "No search arguments provided " << __FILE__ << __LINE__;
-        ws->setSearchIndexes(filterLogicalIndexes,0); // no indexes
+        ws->setSearchIndexes(searchIndexes,0); // no indexes
         validateSearchButtons();
         return false;
     }
@@ -429,90 +430,84 @@ bool MainWindow::runSearchScript()
         update();
         return false;
     }
-    int row=0;
+    int rowCount = wsm->rowCount();
+
+    int row = 0;
     int numOfSearchArguments = searchArgList.count();
-    QStringListIterator iter(searchArgList);
-    QList <QStandardItem * > *items;//  = new QList<QStandardItem *>();
+    QStringListIterator searchIter(searchArgList);
+    QList<QStandardItem *> *searchItems = new QList<QStandardItem *>();
 
-
-    QFuture<QList <QStandardItem *> *> future = QtConcurrent::run(runSearchScriptThread,ws,wsm,searchFunctionVal,
-                                             searchArgList,&filterLogicalIndexes);
-    future.waitForFinished();
-    items = future.result();
-    qDebug() << "NUM OF ITEMS GIVEN BACK = " << items->count() << __FILE__ << __LINE__;
-    /*
-    for(int i=0;i<wsm->rowCount();i++) {
+    for(int i=0;i<rowCount;i++) {
         skip = false;
         args.clear();
         item = wsm->item(i,0);
-        var  = item->data();
-        qmsg = (QMessage *) var.value<void *>();
-        QVariantList **variantLists;
-        iter.toFront();
-        variantLists = new QVariantList *[numOfSearchArguments];
-        // gets list of all values of messages that apply to search arguments
-        int skipPoint = 0;
-        for(int j=0;j<numOfSearchArguments;j++) {
-            variantLists[j] = new QVariantList();
-            arg = searchArgList.at(j);
-            if (qmsg->map.contains(arg)) {
-                QMultiMap<QString,QVariant>::iterator miter = qmsg->map.find(arg);
-                while (miter != qmsg->map.end() &&  miter.key() == arg) {
-                    var1 = miter.value();
-                    variantLists[j]->append(var1);
-                    miter++;
-                }
-            }
-            else {
-                skipPoint = j;
-                skip = true;
-                break; // nbsps
-            }
-        }
-        if (skip) {
-            for (int j=0;j< skipPoint;j++) {
-                delete  variantLists[j];
-            }
-            delete [] variantLists;
+        if (item)  {
+            var  = item->data();
+            qmsg = (QMessage *) var.value<void *>();
         }
         else  {
-            QVariant **vector=0;
+            qmsg = 0;
+        }
+        QVector <QVector<QVariant> > vectors(numOfSearchArguments);
+        double value;
+
+        searchIter.toFront();
+        // gets list of all values of messages that apply to search arguments
+        if (qmsg) {
+            for (int vi=0;vi < vectors.size();vi++) {
+                arg = searchIter.next();
+                if (qmsg->map.contains(arg)) {
+                    QMultiMap<QString,QVariant>::iterator miter = qmsg->map.find(arg);
+                    while (miter != qmsg->map.end() &&  miter.key() == arg) {
+                        var1 = miter.value();
+                        vectors[vi].append(var1);
+                        miter++;
+                    }
+                }
+                else {
+                    skip = true;
+                    break; // nbsps
+                }
+            }
+        }
+        else {
+            skip = true;
+        }
+        if (!skip) {
             int totalSize = 1;
             int repeatLength=1;
             //iteratate over rows, then columns
-            for(int ii=0;ii<numOfSearchArguments;ii++)
-                totalSize = totalSize* variantLists[ii]->count();
-            vector = new QVariant*[totalSize]; // double array
-            for(int ii=0;ii< numOfSearchArguments;ii++)
-                vector[ii] = new QVariant[numOfSearchArguments];
+
+            for(int vj=0;vj< vectors.count();vj++) {
+                totalSize = totalSize* (vectors[vj].count());
+            }
+            QVector<QVector <QVariant>> dataArray(totalSize);
+
+            for(int a=0;a< totalSize;a++) {
+                dataArray[a].resize(vectors.count());
+            }
             repeatLength= 1;
-            for(int ii=0;ii<numOfSearchArguments;ii++) {
-                if (variantLists[ii]->count() ==0 ) {
-                    qWarning() << "ERROR NO VALUES IN VECTOR" << __FILE__ << __LINE__;
-                }
-                else {
-                    repeatLength = totalSize/(repeatLength * (variantLists[ii]->count()));
-                    int k = 0;
-                    int m = 0;
-                    for(int j=0;j<totalSize;j++) {
-                        vector[j][ii]  = variantLists[ii]->at(k);
-                        m++; // should tis be incremented at end of loop
-                        if (m >= repeatLength) {
-                            m = 0;
-                            k++;
-                            if (k > variantLists[ii]->count())
-                                k = 0;
-                        }
+            int k = 0;
+            int m = 0;
+
+            for (int vk = 0; vk < vectors.count(); vk ++) {
+                k = 0;
+                repeatLength = totalSize/(repeatLength * (vectors[vk].count()));
+
+                for(int vl = 0; vl < totalSize;vl++) {
+                    dataArray[vl][vk] = vectors[vk][k];
+                    if ((vl%repeatLength) == 0) {
+                        k++;
                     }
                 }
             }
             QVariantList vargs;
             QVariant mvar;
-            for (int ii=0;ii<totalSize;ii++) {
+            for(int vm = 0;vm < totalSize; vm++) {
                 args.clear();
                 vargs.clear();
-                for (int j=0;j< searchArgList.count();j++) {
-                    mvar = vector[ii][j];
+                for (int vn = 0;vn < vectors.count(); vn++) {
+                    mvar = dataArray[vm][vn];
                     switch (mvar.type()) {
                     case QVariant::Int:
                         args <<  mvar.toInt();
@@ -530,24 +525,19 @@ bool MainWindow::runSearchScript()
                         qWarning() << "Unknown variarnt type in message" << __FILE__ << __LINE__;
                     }
                 }
-                answer = searchFunctionVal.call(QScriptValue(), args);
-                if (answer.toBool()) {
-                    filterLogicalIndexes.append(row);
+                QFuture <QScriptValue> future = QtConcurrent::run(runSearchScriptInThread,searchFunctionVal, args);
+                //future.waitForFinished();
+                if (future.result().toBool()) {
+                    searchItems->append(wsm->item(row));
+                    searchIndexes.append(row);
                     break;
                 }
             }
-            for (int ii=0;ii<numOfSearchArguments;ii++) {
-                delete []vector[ii];
-            }
-            delete []vector;
-            vector = 0;
+            row++;
         }
-        row++;
     }
-*/
-
-   // qDebug() << "NUM OF FILTER INDEXES FOUND = " << filterLogicalIndexes.count() << __FILE__ << __LINE__;
-    ws->setSearchIndexes(filterLogicalIndexes,items);
+    // qDebug() << "NUM OF FILTER INDEXES FOUND = " << filterLogicalIndexes.count() << __FILE__ << __LINE__;
+    ws->setSearchIndexes(searchIndexes,searchItems);
     validateSearchButtons();
     update();
     return true;
