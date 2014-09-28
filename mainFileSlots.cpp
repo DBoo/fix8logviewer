@@ -164,8 +164,10 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
             if (returnStatus == WorkSheet::TERMINATED) {
                 str = "Loading of file: " + fileName + " terminated.";
                 GUI::ConsoleMessage msg(str);
-                statusBar()->showMessage(str,3000);
+                statusBar()->showMessage(str,4000);
                 messageList.append(msg);
+                displayConsoleMessage(msg);
+
             }
             else if (returnStatus == WorkSheet::CANCEL) {
                 tabW->removeTab(index);
@@ -173,7 +175,9 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
                 delete workSheet;
                 str = "Loading of file " + fileName + " canceled.";
                 GUI::ConsoleMessage msg(str);
-                statusBar()->showMessage(str,3000);
+                statusBar()->showMessage(str,4000);
+                displayConsoleMessage(msg);
+
                 messageList.append(msg);
             }
             else if (returnStatus == WorkSheet::FILE_NOT_FOUND) {
@@ -182,8 +186,10 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
                 delete workSheet;
                 str = "Loading of file " + fileName + " failed. File not found.";
                 GUI::ConsoleMessage msg(str);
+                displayConsoleMessage(msg);
+
                 messageList.append(msg);
-                statusBar()->showMessage(str,3000);
+                statusBar()->showMessage(str,4000);
             }
             else {
                 tabW->removeTab(index);
@@ -191,16 +197,20 @@ void MainWindow::fileSelectionFinishedSlot(int returnCode)
                 delete workSheet;
                 str = "Loading of file " + fileName + " failed.";
                 GUI::ConsoleMessage msg(str);
+                displayConsoleMessage(msg);
+
                 messageList.append(msg);
-                statusBar()->showMessage(str,3000);
+                statusBar()->showMessage(str,4000);
             }
         }
         else {
             workSheet->setUpdatesEnabled(true);
             workSheetList.append(workSheet);
             str = "Loading of file " + fileName + " completed. " + QString::number(workSheet->getNumOfRecords()) + " records in " +  QString::number(timeOfLoad,'g',3) + " seconds";
+            qDebug() << str << __FILE__ << __LINE__;
             GUI::ConsoleMessage msg(str,GUI::ConsoleMessage::InfoMsg);
-            statusBar()->showMessage(str,2000);
+             displayConsoleMessage(msg);
+            statusBar()->showMessage(str,4000);
             filterSenderMenuA->setMenu(workSheet->getSenderMenu());
             SearchFunction sf = workSheet->getSearchFunction();
             setSearchFunction(sf);
@@ -412,7 +422,8 @@ void MainWindow::copyTabSlot()
 {
     WorkSheet *workSheet;
     WorkSheet *newWorkSheet;
-    if (tabW->count() < 1) {
+    int currentTabCount = tabW->count();
+    if (currentTabCount < 1) {
         qWarning() << "No tabs to copy" << __FILE__ << __LINE__;
         return;
     }
@@ -428,40 +439,12 @@ void MainWindow::copyTabSlot()
         unsetCursor();
         return;
     }
-    newWorkSheet = new WorkSheet(this);
-    newWorkSheet->setSharedLib(sharedLib);
-    connect(newWorkSheet,SIGNAL(notifyTimeFormatChanged(GUI::Globals::TimeFormat)),
-            this,SLOT(setTimeSlotFromWorkSheet(GUI::Globals::TimeFormat)));
-    connect(newWorkSheet,SIGNAL(modelDropped(FixMimeData *)),
-            this,SLOT(modelDroppedSlot(FixMimeData *)));
-    connect(newWorkSheet,SIGNAL(rowSelected(int)),
-            this,SLOT(rowSelectedSlot(int)));
-    newWorkSheet->setWindowID(uuid);
-    QString fileName = workSheet->getFileName();
+    WorkSheetData wsd = workSheet->getWorksheetData();
+    //currentItemIter =  fileNameModelMap.find(wsd.fileName);
+    addWorkSheet(wsd);
+    if (currentTabCount < tabW->count()) // terminated or problem loading it
+        setCurrentTabAndSelectedRow(tabW->count()-1,2);
 
-    QString str = fileName;
-    if (str.length() > 36) {
-        str = "..." + str.right(33);
-    }
-    int currentIndex = tabW->currentIndex();
-    int index = tabW->addTab(newWorkSheet,str);
-
-    tabW->setToolTip(fileName);
-    tabW->setCurrentIndex(index);
-    bool bstatus = newWorkSheet->copyFrom(*workSheet);
-    if (!bstatus)
-        if (newWorkSheet->loadCanceled()) {
-            tabW->removeTab(index);
-            tabW->setCurrentIndex(currentIndex);
-            newWorkSheet->deleteLater();
-            QString str = "Copy Canceled";
-            GUI::ConsoleMessage msg(str);
-            statusBar()->showMessage(str,3000);
-            displayConsoleMessage(msg);
-            unsetCursor();
-            return;
-        }
-    workSheetList.append(workSheet);
     unsetCursor();
 }
 void MainWindow::exportSlot(QAction *action)

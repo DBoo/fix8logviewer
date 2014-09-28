@@ -91,7 +91,7 @@ bool WorkSheet::copyFrom(WorkSheet &oldws)
 
         if(!_model || cancelLoad) {
             //emit terminateCopy(this);
-            showLoadProcess(false);
+            //showLoadProcess(false);
             return false;
         }
     }
@@ -411,7 +411,7 @@ bool WorkSheet::loadFileName(QString &fileName,
             if (cancelReason == TERMINATED)  // set from terminate
                 returnCode = TERMINATED;
             //setUpdatesEnabled(true);
-            showLoadProcess(false);
+            // showLoadProcess(false);
 
             return false;
         }

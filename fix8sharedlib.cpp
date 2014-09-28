@@ -19,7 +19,7 @@ Fix8SharedLib::Fix8SharedLib():count(0),defaultTableSchema(0),tableSchemas(0)
 }
 void Fix8SharedLib::init()
 {
-  defaultHeaderStrs <<  "MsgSeqNum" << "MsgType" << "SendingTime" << "SenderCompID" << "TargetCompID";
+    defaultHeaderStrs <<  "MsgSeqNum" << "MsgType" << "SendingTime" << "SenderCompID" << "TargetCompID";
 }
 Fix8SharedLib * Fix8SharedLib::create(QString fileName)
 {
@@ -39,13 +39,14 @@ Fix8SharedLib * Fix8SharedLib::create(QString fileName)
     //qDebug() << "BASE NAME = " << baseName << __FILE__ << __LINE__;
     QString windowsDebugName;
 #ifdef Q_OS_WIN
-        windowsDebugName = baseName.toUpper();
-        if (windowsDebugName.endsWith('d',Qt::CaseInsensitive)) {
-            qDebug() << "WINDOWS DEBUG LIBRARY" << windowsDebugName <<  __FILE__ << __LINE__;
-            windowsDebugName.truncate(windowsDebugName.length()-1);
-            qDebug() << "NEW NAME SET TO  << " << windowsDebugName << __FILE__ << __LINE__;
-        }
-         f8sl->name = windowsDebugName;
+    windowsDebugName = baseName.toUpper();
+    //qDebug() << "!!!!!!EXECUTING WINDOWS CODE TO CHANGE NAME TO UPPER" << __FILE__ << __LINE__;
+    if (windowsDebugName.endsWith('d',Qt::CaseInsensitive)) {
+       // qDebug() << "WINDOWS DEBUG LIBRARY" << windowsDebugName <<  __FILE__ << __LINE__;
+        windowsDebugName.truncate(windowsDebugName.length()-1);
+        //qDebug() << "NEW NAME SET TO  << " << windowsDebugName << __FILE__ << __LINE__;
+    }
+    f8sl->name = windowsDebugName;
 #else
     QString libStr = baseName.left(3);
     if (libStr != "lib") {
@@ -55,13 +56,12 @@ Fix8SharedLib * Fix8SharedLib::create(QString fileName)
         return f8sl;
     }
     f8sl->name = baseName.right(baseName.length()-3);
+    //qDebug() << "************** HANDLE BASE NAME SET TO " << f8sl->name << __FILE__ << __LINE__;
 #endif
     bstatus = f8sl->loadFix8so();
-   // qDebug() << "\tAFTER LOAD bstatus =" << bstatus __FILE__ << __LINE__;
-    if (bstatus)
-        f8sl->isOK = true;
-    else
-        f8sl = false;
+    // qDebug() << "\tAFTER LOAD bstatus =" << bstatus __FILE__ << __LINE__;
+    f8sl->isOK = bstatus;
+
     return f8sl;
 }
 TableSchema * Fix8SharedLib::getTableSchema(qint32 tableSchemaID)
@@ -128,11 +128,12 @@ void Fix8SharedLib::setTableSchemas(TableSchemaList *tsl)
 bool Fix8SharedLib::loadFix8so()
 {
     bool bstatus;
+    char ctxfuncstr[120];
     QString key;
     QString value;
     QString fieldName;
     MessageField *messageField;
-    qDebug() << "LOAD LIBRARY = " << fileName << __FILE__ << __LINE__;
+   // qDebug() << "LOAD LIBRARY = " << fileName << __FILE__ << __LINE__;
     QString fn = fileName;
     fixLib = new QLibrary(fn);
 
@@ -144,26 +145,30 @@ bool Fix8SharedLib::loadFix8so()
         delete fixLib;
         return false;
     }
-   // qDebug() << "FIX* Lib load = 0k" << __FILE__ << __LINE__;
+    // qDebug() << "FIX* Lib load = 0k" << __FILE__ << __LINE__;
     QFunctionPointer _handle;
-    QString ctxStr(name + "_ctx");
-    const char *ctxfuncstr = ctxStr.toLatin1().data();
-    if (!ctxfuncstr) {
+    QString ctxStr;
+    memset(ctxfuncstr,'\0',120);
+    ctxStr = name + QString("_ctx");
+    memcpy(ctxfuncstr,ctxStr.toStdString().c_str(),ctxStr.length());
+
+    //ctxfuncstr = "FIX50SP1_ctx"; //ctxStr.toStdString().c_str();
+   // qDebug() << ">>>>>>>>>>>>>>>Looking for handle: " << ctxStr;
+    //printf(">>>>>>>>>>>>>>>>>>NAME OF STRING IN ASCII %s\n",ctxfuncstr);
+   // fflush(stdout);
+    if (ctxStr.length() < 1) {
         qWarning() << ">>>>> Error - failed loading library " << fileName << "ctx handle not found" << __FILE__ << __LINE__;
         errorMessage  =  "Error - failed loading library " + fileName + ".  CTX handle not found";
         isOK = false;
         //delete fixLib;
         return false;
     }
-     try {
-        qDebug() << "\tTRY TO RESOLVE NAME FOR LIB...";
+    //printf("\tTRY TO RESOLVE NAME FOR LIB, %s\n",ctxfuncstr); // << __FILE__ << __LINE__;
+   // fflush(stdout);
+
     _handle = fixLib->resolve(ctxfuncstr);
-    }
-    catch (exception& e) {
-        qDebug() << "\t\tCAUGHT ERROR";
-        std::cout << "ERROR IN RESOLVING LIB:";
-    }
-    if (!_handle ||  _handle == 0) {
+
+    if (!_handle) {
         qWarning()  << "Failed to get handle " << ctxStr << " in library: " << fileName << __FILE__ << __LINE__;
         errorMessage = "Failed to get handle " +  ctxStr +  " in library: " + fileName;
         isOK = false;
@@ -171,7 +176,7 @@ bool Fix8SharedLib::loadFix8so()
         return false;
     }
     int level;
-    qDebug() << "EVERYTHING OK " << __FILE__ << __LINE__;
+    //qDebug() << "EVERYTHING OK " << __FILE__ << __LINE__;
     bstatus = true;
     ctxFunc   = reinterpret_cast<const F8MetaCntx& (*)()> (_handle);
     if (!ctxFunc) {
@@ -204,7 +209,7 @@ bool Fix8SharedLib::loadFix8so()
     return bstatus;
 }
 void Fix8SharedLib::generate_traits(const TraitHelper& tr,QMap <QString, QBaseEntry *> &baseMap,FieldUseList &ful,
-                              MessageField *mf,QList <QBaseEntry *> *qbaseEntryList,int *level)
+                                    MessageField *mf,QList <QBaseEntry *> *qbaseEntryList,int *level)
 {
     int ii = 0;
     for (F8MetaCntx::const_iterator itr(F8MetaCntx::begin(tr)); itr != F8MetaCntx::end(tr); ++itr)
@@ -248,7 +253,7 @@ void Fix8SharedLib::generate_traits(const TraitHelper& tr,QMap <QString, QBaseEn
     }
 }
 void Fix8SharedLib::generate_traits(const TraitHelper& tr,QMap <QString, QBaseEntry *> &baseMap,FieldUseList &ful,
-                              MessageField *mf,QBaseEntryList *qbaseEntryList,int *level)
+                                    MessageField *mf,QBaseEntryList *qbaseEntryList,int *level)
 {
     int ii = 0;
     QString name;
