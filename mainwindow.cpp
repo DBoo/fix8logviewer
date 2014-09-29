@@ -1454,6 +1454,26 @@ void MainWindow::resizeEvent(QResizeEvent *re)
     m = qMax(size1,size2);
     filterLineEdit->setMinimumWidth(m); //,filterLineEdit->height());
     searchLineEdit->setMinimumWidth(m); //,searchLineEdit->height());
+    int maxW = fm.averageCharWidth()*40;
+    qDebug() << "TWENTY CHARS WIDTH = " << maxW;
+    int windowWidth =re->size().width();
+    qDebug() << "WINDOW WIDTH" << windowWidth << __FILE__ << __LINE__;
+    int delta = maxW*4;
+    if ((delta) > (windowWidth*.80)) {
+        qDebug() << "USE TINY";
+        maxW = windowWidth*.30;
+    }
+    else if ((maxW*4)> (windowWidth*.50)){
+        qDebug() << "USE MED";
+        maxW = windowWidth*.50;
 
+    }
+    else {
+        qDebug() << "USE BIG";
+        maxW = windowWidth*.60;
+    }
+    filterLineEdit->setMaximumWidth(maxW);
+    searchLineEdit->setMaximumWidth(maxW);
+    qDebug() << "SET MAX WIDTH TO " << maxW;
     QMainWindow::resizeEvent(re);
 }
