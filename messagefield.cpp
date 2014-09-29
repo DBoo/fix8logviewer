@@ -275,6 +275,10 @@ MessageField::MessageField(QString &Key, QString &Name):
 {
 
 }
+MessageField::~MessageField()
+{
+    qDebug() << "DELETE MESSAGE FIELD" << __FILE__ << __LINE__;
+}
 
 MessageFieldList::MessageFieldList() : QList<MessageField*>()
 {
@@ -392,6 +396,15 @@ QMessage::QMessage(const QMessage &qm)
         mesg = qm.mesg->clone();
     map = qm.map;
     ctxFunc = qm.ctxFunc;
+}
+QMessage::~QMessage()
+{
+    //qDebug() << "DELETE QMESSAGE" << __FILE__ << __LINE__;
+    if (mesg) {
+        delete mesg;
+    }
+    else
+       qDebug() << "DO NOT DELETE MESSAGE in QMessage";
 }
 
 void QMessage::set(Message *m,QLatin1String sid,int seq,std::function<const F8MetaCntx&()> cFunc)

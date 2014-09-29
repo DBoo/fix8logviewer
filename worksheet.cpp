@@ -192,17 +192,17 @@ WorkSheet::WorkSheet(WorkSheetModel *model,
 }
 WorkSheet::~WorkSheet()
 {
-    //qDebug() << "Delete Work SHeet" << __FILE__ << __LINE__;
+    qDebug() << "Delete Work SHeet" << __FILE__ << __LINE__;
     if (_model) {
-        _model->clear();
+        //_model->clear();
+        _model->removeRows(0,_model->rowCount());
         delete _model;
     }
     if (messageArray)
         delete []messageArray;
-   // if (messageList)
-   //     qDeleteAll(*messageList);
     if (messageList)
-        delete messageList;
+        qDeleteAll(*messageList);
+
     if (senderMenu) {
         delete senderMenu;
         senderMenu = 0;
