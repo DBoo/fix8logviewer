@@ -87,9 +87,10 @@ bool Fix8Log::init()
     bool haveError = false;
     readSettings();
     initDatabase();
-    //QThreadPool::globalInstance()->setMaxThreadCount(20);
+    copySampleFilesToUser();
 
-    // QListIterator <QPair<QString ,FieldUse *>> pairListIter(fix8shareLib->fieldUsePairList);
+    QThreadPool::globalInstance()->setMaxThreadCount(10);
+
 
     // initial screeen
     qApp->processEvents(QEventLoop::ExcludeSocketNotifiers,10);
@@ -105,7 +106,7 @@ bool Fix8Log::init()
             if (wd.fix8sharedlib.length() > 0) {
                 fixlib = fix8ShareLibList.findByFileName(wd.fix8sharedlib);
                 if (!fixlib) {
-                   // qDebug() << "Create Shared Lib" << __FILE__ << __LINE__;
+                    // qDebug() << "Create Shared Lib" << __FILE__ << __LINE__;
                     bstatus = createSharedLib(wd.fix8sharedlib,&fixlib,defaultTableSchema);
                     if (!bstatus)
                         goto done;
@@ -316,5 +317,41 @@ bool Fix8Log::createSharedLib(QString &fix8sharedlib,Fix8SharedLib **fixlib,
     (*fixlib)->setDefaultTableSchema(defaultTableSchema);
     (*fixlib)->setTableSchemas(tsl);
     //qDebug() << "STATUS OF SHARED LIB AT END = " <<  (*fixlib)->isOK << __FILE__ << __LINE__;
+    return true;
+}
+bool Fix8Log::copySampleFilesToUser()
+{
+    bool bstatus;
+    QDir systemDir(qApp->applicationDirPath() + "/samples");
+    QDir usersDir(QDir::homePath() + "/f8logview/samples");
+    if (!systemDir.exists()) {
+        qWarning() << "System sample files not found:" << systemDir.absolutePath() << __FILE__ << __LINE__;
+        sampleFilesAvailable  = false;
+        return false;
+    }
+    if (!usersDir.exists()) {
+        bstatus = usersDir.mkdir(usersDir.absolutePath());
+        if (!bstatus) {
+            qWarning() << "Failed to create a path for " << usersDir.absolutePath() << __FILE__ << __LINE__;
+            sampleFilesAvailable  = false;
+            return false;
+        }
+    }
+    QFileInfoList fileInfoList = systemDir.entryInfoList(QDir::Files |QDir::NoDotAndDotDot| QDir::NoSymLinks);
+    QFileInfo fi;
+    QStandardItem *si;
+    QListIterator<QFileInfo> iter(fileInfoList);
+    while(iter.hasNext()) {
+        QString baseName;
+        fi = iter.next();
+        baseName = fi.fileName();
+        QString userFileName = usersDir.path() + QDir::separator() + baseName;
+        QFile userFile(userFileName);
+        if (!userFile.exists()) {
+            qDebug() << "Creating user file: " << userFileName << __FILE__ << __LINE__;
+            //QFile oldFile(fi.absoluteFilePath());
+            QFile::copy(fi.absoluteFilePath(),userFileName);
+        }
+    }
     return true;
 }

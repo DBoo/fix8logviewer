@@ -134,8 +134,10 @@ protected:
 signals:
     void notifyTimeFormatChanged(GUI::Globals::TimeFormat);
 private:
+    bool copySampleFilesToUser();
     bool createSharedLib(QString &fix8sharedlib,Fix8SharedLib **fixlib,
                           TableSchema *defaultTableSchema);
+
     void initDatabase();
     SearchDialog *searchDialog;
     SearchDialog *filterDialog;
@@ -146,6 +148,7 @@ private:
     Fix8SharedLibList fix8ShareLibList;
     QFile *dbFile;
     QWidget *hiddenParent;
+    bool sampleFilesAvailable;
 };
 
 #endif // FIX8LOG_H
