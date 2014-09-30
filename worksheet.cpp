@@ -635,7 +635,7 @@ void  WorkSheet::rowSelectedSlot(QModelIndex mi)
     }
     currentRow = mi.row();
     QMessage *message;
-    qDebug() << "MAPPED ROW = " << currentRow;
+    //qDebug() << "MAPPED ROW = " << currentRow;
     if (!_model) {
         qWarning() << "ERROR - MODEL IS NULL" << __FILE__ << __LINE__;
         emit rowSelected(currentRow);

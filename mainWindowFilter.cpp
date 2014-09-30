@@ -313,7 +313,6 @@ bool MainWindow::runFilterScript()
     int row=0;
     int numOfFilterArguments = filterArgList.count();
     QStringListIterator filterIter(filterArgList);
-    QString filterArg;
     filterProgressBar->show();
     int rowCount = wsm->rowCount();
     for(int i=0;i<rowCount;i++) {
@@ -423,8 +422,8 @@ bool MainWindow::runFilterScript()
                     break;
                 }
             }
-            row++;
         }
+        row++;
     }
     WorkSheetData::FilterMode filterMode = (WorkSheetData::FilterMode) filterButtonGroup->checkedId();
     ws->setFilterIndexes(filterLogicalIndexes,filterMode); // add mode to this

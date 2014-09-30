@@ -372,7 +372,6 @@ QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *ws
                 }
                 answer = searchFunctionVal.call(QScriptValue(), args);
                 if (answer.toBool()) {
-                    qDebug() << "ITEM ROW " << item->row();
                     filterLogicalIndexes->append(row);
                     items->append(item);
                     break;
@@ -386,7 +385,6 @@ QList <QStandardItem *> * runSearchScriptThread(WorkSheet *ws,WorkSheetModel *ws
         }
         row++;
     }
-    qDebug() << "TIME TO PERFORM FILTER = " << elapsedTimer.elapsed() << __FILE__ << __LINE__;
     return items;
 }
 
@@ -401,7 +399,10 @@ bool MainWindow::runSearchScript()
     QVariant var,var1;
     QString arg;
     QVector <qint32> searchIndexes;
-
+    QThreadPool threadPool;
+    int numOfThreads = threadPool.maxThreadCount();
+    if (numOfThreads < 0)
+        numOfThreads = 0;
     searchFunctionVal = engine.evaluate(searchFunction.javascript);
     if (tabW->count()  < 1) {
         qWarning() << "Search Failed, no work sheets" << __FILE__ << __LINE__;
@@ -430,13 +431,11 @@ bool MainWindow::runSearchScript()
         update();
         return false;
     }
-    int rowCount = wsm->rowCount();
-
     int row = 0;
-    int numOfSearchArguments = searchArgList.count();
+    int rowCount = wsm->rowCount();
     QStringListIterator searchIter(searchArgList);
     QList<QStandardItem *> *searchItems = new QList<QStandardItem *>();
-
+    int numOfSearchArguments = searchArgList.count();
     for(int i=0;i<rowCount;i++) {
         skip = false;
         args.clear();
@@ -526,17 +525,19 @@ bool MainWindow::runSearchScript()
                     }
                 }
                 QFuture <QScriptValue> future = QtConcurrent::run(runSearchScriptInThread,searchFunctionVal, args);
-                //future.waitForFinished();
+                if (row >=( rowCount - numOfThreads)) {
+                    future.waitForFinished();
+                }
                 if (future.result().toBool()) {
                     searchItems->append(wsm->item(row));
                     searchIndexes.append(row);
                     break;
                 }
             }
-            row++;
         }
+        row++;
+
     }
-    // qDebug() << "NUM OF FILTER INDEXES FOUND = " << filterLogicalIndexes.count() << __FILE__ << __LINE__;
     ws->setSearchIndexes(searchIndexes,searchItems);
     validateSearchButtons();
     update();
